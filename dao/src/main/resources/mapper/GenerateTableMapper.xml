@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.panshicloud.base.dao.mapper.GenerateTableMapper">
+
+    <delete id="delete">
+        drop table ${tableName}
+    </delete>
+
+    <update id="rename">
+        rename
+            table
+            ${tableName}
+                to
+                ${toTableName}
+    </update>
+
+    <select id="isExist" parameterType="String" resultType="Integer">
+        SELECT COUNT(*)
+        FROM User_Tables
+        WHERE table_name = UPPER('${tableName}')
+    </select>
+
+    <select id="isFieldExist" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        from all_col_comments
+        WHERE table_name = UPPER('${tableName}')
+          AND owner = UPPER('${tableSpace}')
+          AND column_name = UPPER('${field}')
+    </select>
+
+    <select id="findField" resultType="java.util.List">
+        SELECT column_name
+        from all_col_comments
+        WHERE table_name = UPPER('${tableName}')
+          AND owner = UPPER('${tableSpace}')
+    </select>
+
+    <select id="createIndex">
+        CREATE
+        <if test="indexType==1 and indexType!='' and indexType!=null">
+            UNIQUE
+        </if>
+        INDEX ${indexName} ON ${tableName}(${columnList})
+    </select>
+
+    <delete id="deleteIndex">
+        drop INDEX ${indexName}
+    </delete>
+
+    <select id="findIndex" resultType="java.lang.String">
+        select index_name
+        from user_indexes
+        where table_name = UPPER('${tableName}')
+    </select>
+
+    <select id="findFieldAndComments" resultType="com.panshicloud.base.dao.dos.FieldCommentDo">
+        SELECT column_name as field, comments
+        from all_col_comments
+        WHERE table_name = UPPER('${tableName}')
+          AND owner = UPPER('${tableSpace}')
+    </select>
+    <select id="findTableStructure" resultType="java.lang.String">
+        SELECT dbms_metadata.get_ddl('TABLE', UPPER('${tableName}'), UPPER('${tableSpace}'))
+        from dual
+    </select>
+
+    <select id="findAllTable" resultType="java.util.Map">
+        SELECT table_name, comments
+        from all_tab_comments
+        WHERE owner = UPPER('${tableSpace}')
+    </select>
+
+    <select id="isNullField" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        from ${tableName}
+        WHERE ${field} is null
+    </select>
+
+    <update id="generate">
+        CREATE TABLE ${tableName} (
+        <foreach collection="list" item="field">
+            <include refid="fieldInfo"/>
+            ,
+        </foreach>
+        <foreach collection="list" item="item">
+            <if test="item.isPrimaryKey == 1">
+                CONSTRAINT "${tableName}_${item.name}_PK" PRIMARY KEY (${item.name})
+            </if>
+        </foreach>
+        )
+    </update>
+
+    <update id="createTable">
+        ${sql}
+    </update>
+
+    <update id="insertField">
+        alter table ${tableName} add (
+        <include refid="fieldInfo"/>
+        )
+    </update>
+
+    <update id="batchInsertField">
+        alter table ${tableName}
+        <foreach collection="list" item="field">
+            add (<include refid="fieldInfo"/>)
+        </foreach>
+    </update>
+
+    <update id="deleteField">
+        alter table ${tableName}
+            drop (${fieldName})
+    </update>
+
+    <update id="batchDeleteField">
+        alter table ${tableName} drop (
+        <foreach collection="list" item="fieldName" separator=",">
+            ${fieldName}
+        </foreach>
+        )
+    </update>
+
+    <update id="renameField">
+        alter table ${tableName} rename column ${fieldName} to ${toFieldName}
+    </update>
+    <update id="generateComment">
+        comment on column
+        ${tableName}
+        .
+        ${field}
+        is
+        &apos;${comment}&apos;
+    </update>
+
+    <update id="updateField">
+        alter table ${tableName}
+            modify (<include refid="fieldInfo"/>)
+    </update>
+
+    <select id="getTypes" resultType="com.panshicloud.base.dao.dos.FieldTypeDo">
+        select  COLUMN_NAME as fieldName,DATA_TYPE as type
+        from user_tab_columns
+        WHERE table_name = UPPER('${tableName}')
+    </select>
+
+
+    <sql id="fieldInfo">
+        ${field.name}
+        <choose>
+            <when test="field.type == 0">
+                varchar2(${field.length})
+            </when>
+            <when test="field.type == 1">
+                NUMBER(11,0)
+            </when>
+            <when test="field.type == 2">
+                NUMBER(11,2)
+            </when>
+            <when test="field.type == 3">
+                date
+            </when>
+            <when test="field.type == 4">
+                date
+            </when>
+            <when test="field.type == 5">
+                clob
+            </when>
+        </choose>
+        <if test="field.isAllowNull == 0">
+            NOT NULL
+        </if>
+    </sql>
+</mapper>
