@@ -1,6 +1,7 @@
 package com.panshicloud.base.operationlog.utils;
 
 import com.panshicloud.base.remote.dto.OperationLogDto;
+import com.panshicloud.common.utils.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -30,20 +31,22 @@ public class ConvertUtils {
         return getOperation(request, clazz, type, operation, info);
     }
 
-    private static OperationLogDto getOperation(HttpServletRequest request, Class<?> clazz, String type, String operation, String info){
+    public static OperationLogDto getOperation(HttpServletRequest request, Class<?> clazz, String type, String operation, String info) {
         // 保存日志
         OperationLogDto entity = new OperationLogDto();
         entity.setType(type);
         entity.setOperation(operation);
         entity.setLogInfo(info);
         entity.setInterfaceName(clazz.getName());
-        setRequest(entity, request);
+        if (request != null) {
+            setRequest(entity, request);
+        }
         return entity;
     }
 
-    private static void setRequest(OperationLogDto entity, HttpServletRequest request){
+    private static void setRequest(OperationLogDto entity, HttpServletRequest request) {
         entity.setServerIp(request.getLocalAddr());
-        entity.setClientIp(request.getRemoteAddr());
+        entity.setClientIp(StringUtils.split(request.getHeader("X-Forwarded-For"))[0]);
         entity.setClientCode(request.getHeader("User-Agent"));
         entity.setUri(request.getRequestURI());
         entity.setUrl(request.getRequestURL().toString());

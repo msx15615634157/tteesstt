@@ -29,8 +29,11 @@ public class DefaultTab extends AbstractTab {
         rst.add(new IsSyncUnits());
         rst.add(new SyncRolesExclude());
         rst.add(new SyncUnitsExclude());
-        rst.add(new SysCustomSummaryTargetName());
         rst.add(new KjhsCustom());
+        rst.add(new IsSyncUserAutoAddDiv());
+        rst.add(new IsValidYsdm());
+        rst.add(new FinIntegrateHebAppointRoleSyncRolesExclude());
+        rst.add(new FinIntegrateHebAppointRoleSyncUnitsExclude());
         return rst;
     }
 

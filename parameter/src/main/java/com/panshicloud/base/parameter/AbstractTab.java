@@ -62,8 +62,8 @@ public abstract class AbstractTab {
 
             @Override
             public List<AbstractParameter> parameters() {
-                String AbstractParameters = (String) map.get("parameters");
-                List parameters = JSON.parseObject(AbstractParameters, List.class);
+                String abstractParameters = (String) map.get("parameters");
+                List parameters = JSON.parseObject(abstractParameters, List.class);
                 if (!(parameters instanceof List)) {
                     throw ExceptionHelper.newException(JpErrorCodeCst.SYSTEM_ERROR, "options必须为List集合");
                 }

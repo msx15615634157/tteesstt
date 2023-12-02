@@ -16,7 +16,7 @@ public class DubboConfig {
     @Value("${dubbo.registry.address}")
     private String registryAddress;
 
-    @Value("${dubbo.registry.parameters.namespace}")
+    @Value("${dubbo.registry.parameters.namespace:public}")
     private String namespace;
 
 }

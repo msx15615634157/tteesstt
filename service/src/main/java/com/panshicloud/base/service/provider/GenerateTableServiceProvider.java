@@ -82,12 +82,10 @@ public class GenerateTableServiceProvider implements IGenerateTableService {
         if (primaryKeyCount != 1) {
             throw ExceptionHelper.newException(JpErrorCodeCst.SYSTEM_ERROR, "未设置主键或设置多个主键");
         }
-        generateDataTableMapper.generate(tableName, ConvertHelper.tToV(entity, GenerateTableFieldDo.class));
-        // 新增表字段注释
-        entity.forEach(it -> {
-            if (StringUtils.isNotBlank(it.getComment())) {
-                generateDataTableMapper.generateComment(tableName, it.getName(), it.getComment());
-            }
+        List<GenerateTableFieldDo> generateTableFieldDoList = ConvertHelper.tToV(entity, GenerateTableFieldDo.class);
+        generateDataTableMapper.generate(tableName, generateTableFieldDoList);
+        generateTableFieldDoList.forEach(it -> {
+            generateDataTableMapper.generateComment(tableName, it);
         });
     }
 
@@ -113,7 +111,7 @@ public class GenerateTableServiceProvider implements IGenerateTableService {
 
     @Override
     public List<String> findIndex(String tableName) {
-        return generateDataTableMapper.findIndex(tableName);
+        return generateDataTableMapper.findIndex(tableName, tableSpace);
     }
 
     @Override
@@ -123,15 +121,17 @@ public class GenerateTableServiceProvider implements IGenerateTableService {
 
     @Override
     public void insertField(String tableName, GenerateTableFieldDto field) {
-        generateDataTableMapper.insertField(tableName, ConvertHelper.tToV(field, GenerateTableFieldDo.class));
-        generateDataTableMapper.generateComment(tableName, field.getName(), field.getComment());
+        GenerateTableFieldDo generateTableFieldDo = ConvertHelper.tToV(field, GenerateTableFieldDo.class);
+        generateDataTableMapper.insertField(tableName, generateTableFieldDo);
+        generateDataTableMapper.generateComment(tableName, generateTableFieldDo);
     }
 
     @Override
     public void batchInsertField(String tableName, List<GenerateTableFieldDto> fieldList) {
-        generateDataTableMapper.batchInsertField(tableName, ConvertHelper.tToV(fieldList, GenerateTableFieldDo.class));
-        fieldList.forEach(it -> {
-            generateDataTableMapper.generateComment(tableName, it.getName(), it.getComment());
+        List<GenerateTableFieldDo> generateTableFieldList = ConvertHelper.tToV(fieldList, GenerateTableFieldDo.class);
+        generateDataTableMapper.batchInsertField(tableName, generateTableFieldList);
+        generateTableFieldList.forEach(it -> {
+            generateDataTableMapper.generateComment(tableName, it);
         });
     }
 
@@ -192,14 +192,15 @@ public class GenerateTableServiceProvider implements IGenerateTableService {
 
     @Override
     public Integer getFieldType(String tableName, String fieldName) {
-        List<FieldTypeDo> types = generateDataTableMapper.getTypes(tableName);
-        Optional<FieldTypeDo> optional = types.stream().filter(it -> StringUtils.equals(it.getFieldName(), fieldName)).findAny();
+        List<FieldTypeDo> types = generateDataTableMapper.getTypes(tableName, tableSpace);
+        Optional<FieldTypeDo> optional = types.stream().filter(it -> it.getFieldName().equalsIgnoreCase(fieldName)).findAny();
         if (!optional.isPresent()) {
             throw ExceptionHelper.newException(JpErrorCodeCst.SYSTEM_ERROR, "字段不存在");
         }
         String type = optional.get().getType();
         switch (type) {
             case CommonCst.TABLE_FIELD_VARCHAR2:
+            case CommonCst.TABLE_FIELD_VARCHAR:
                 return CommonCst.TABLE_FIELD_TYPE_VARCHAR;
             case CommonCst.TABLE_FIELD_DATE:
                 return CommonCst.TABLE_FIELD_TYPE_DATE;

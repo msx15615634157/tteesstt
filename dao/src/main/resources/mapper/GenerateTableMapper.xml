@@ -8,19 +8,25 @@
 
     <update id="rename">
         rename
-            table
-            ${tableName}
-                to
-                ${toTableName}
+        table
+        ${tableName}
+        to
+        ${toTableName}
     </update>
 
-    <select id="isExist" parameterType="String" resultType="Integer">
+    <select id="isExist" parameterType="String" resultType="Integer" databaseId="oracle">
         SELECT COUNT(*)
         FROM User_Tables
         WHERE table_name = UPPER('${tableName}')
     </select>
 
-    <select id="isFieldExist" resultType="java.lang.Integer">
+    <select id="isExist" parameterType="String" resultType="Integer" databaseId="mysql">
+        SELECT COUNT(*)
+        FROM information_schema.TABLES
+        WHERE table_name = '${tableName}'
+    </select>
+
+    <select id="isFieldExist" resultType="java.lang.Integer" databaseId="oracle">
         SELECT COUNT(*)
         from all_col_comments
         WHERE table_name = UPPER('${tableName}')
@@ -28,11 +34,26 @@
           AND column_name = UPPER('${field}')
     </select>
 
-    <select id="findField" resultType="java.util.List">
+    <select id="isFieldExist" resultType="java.lang.Integer" databaseId="mysql">
+        SELECT COUNT(*)
+        from information_schema.COLUMNS
+        WHERE table_name = '${tableName}'
+          AND table_schema = '${tableSpace}'
+          AND column_name = '${field}'
+    </select>
+
+    <select id="findField" resultType="java.util.List" databaseId="oracle">
         SELECT column_name
         from all_col_comments
         WHERE table_name = UPPER('${tableName}')
           AND owner = UPPER('${tableSpace}')
+    </select>
+
+    <select id="findField" resultType="java.util.List" databaseId="mysql">
+        SELECT column_name
+        from information_schema.COLUMNS
+        WHERE table_name = '${tableName}'
+          AND table_schema = '${tableSpace}'
     </select>
 
     <select id="createIndex">
@@ -47,27 +68,48 @@
         drop INDEX ${indexName}
     </delete>
 
-    <select id="findIndex" resultType="java.lang.String">
+    <select id="findIndex" resultType="java.lang.String" databaseId="oracle">
         select index_name
         from user_indexes
         where table_name = UPPER('${tableName}')
     </select>
 
-    <select id="findFieldAndComments" resultType="com.panshicloud.base.dao.dos.FieldCommentDo">
+    <select id="findIndex" resultType="java.lang.String" databaseId="mysql">
+        select index_name
+        from information_schema.statistics
+        where table_name = '${tableName}'
+          and table_schema = '${tableSpace}'
+    </select>
+
+    <select id="findFieldAndComments" resultType="com.panshicloud.base.dao.dos.FieldCommentDo" databaseId="oracle">
         SELECT column_name as field, comments
         from all_col_comments
         WHERE table_name = UPPER('${tableName}')
           AND owner = UPPER('${tableSpace}')
     </select>
+
+    <select id="findFieldAndComments" resultType="com.panshicloud.base.dao.dos.FieldCommentDo" databaseId="mysql">
+        SELECT column_name as field, column_comment as comments
+        from information_schema.columns
+        WHERE table_name = '${tableName}'
+          AND table_schema = '${tableSpace}'
+    </select>
+
     <select id="findTableStructure" resultType="java.lang.String">
         SELECT dbms_metadata.get_ddl('TABLE', UPPER('${tableName}'), UPPER('${tableSpace}'))
         from dual
     </select>
 
-    <select id="findAllTable" resultType="java.util.Map">
+    <select id="findAllTable" resultType="java.util.Map" databaseId="oracle">
         SELECT table_name, comments
         from all_tab_comments
         WHERE owner = UPPER('${tableSpace}')
+    </select>
+
+    <select id="findAllTable" resultType="java.util.Map" databaseId="mysql">
+        SELECT table_name, comments
+        from information_schema.TABLES
+        WHERE table_schema = '${tableSpace}'
     </select>
 
     <select id="isNullField" resultType="java.lang.Integer">
@@ -76,7 +118,7 @@
         WHERE ${field} is null
     </select>
 
-    <update id="generate">
+    <update id="generate" databaseId="oracle">
         CREATE TABLE ${tableName} (
         <foreach collection="list" item="field">
             <include refid="fieldInfo"/>
@@ -84,7 +126,21 @@
         </foreach>
         <foreach collection="list" item="item">
             <if test="item.isPrimaryKey == 1">
-                CONSTRAINT "${tableName}_${item.name}_PK" PRIMARY KEY (${item.name})
+                CONSTRAINT "${tableName}_${item.name}" PRIMARY KEY (${item.name})
+            </if>
+        </foreach>
+        )
+    </update>
+
+    <update id="generate" databaseId="mysql">
+        CREATE TABLE ${tableName} (
+        <foreach collection="list" item="field">
+            <include refid="fieldInfo"/>
+            ,
+        </foreach>
+        <foreach collection="list" item="item">
+            <if test="item.isPrimaryKey == 1">
+                PRIMARY KEY (${item.name})
             </if>
         </foreach>
         )
@@ -100,19 +156,35 @@
         )
     </update>
 
-    <update id="batchInsertField">
+    <update id="batchInsertField" databaseId="oracle">
         alter table ${tableName}
         <foreach collection="list" item="field">
             add (<include refid="fieldInfo"/>)
         </foreach>
     </update>
 
-    <update id="deleteField">
+    <update id="batchInsertField" databaseId="mysql">
         alter table ${tableName}
-            drop (${fieldName})
+        <foreach collection="list" item="field" separator=",">
+            add (<include refid="fieldInfo"/>)
+        </foreach>
     </update>
 
-    <update id="batchDeleteField">
+    <update id="deleteField" databaseId="oracle">
+        alter table ${tableName}
+        drop
+        (
+        ${fieldName}
+        )
+    </update>
+
+    <update id="deleteField" databaseId="mysql">
+        alter table ${tableName}
+        drop
+        ${fieldName}
+    </update>
+
+    <update id="batchDeleteField" databaseId="oracle">
         alter table ${tableName} drop (
         <foreach collection="list" item="fieldName" separator=",">
             ${fieldName}
@@ -120,31 +192,83 @@
         )
     </update>
 
+    <update id="batchDeleteField" databaseId="mysql">
+        alter table ${tableName}
+        <foreach collection="list" item="fieldName" separator=",">
+            drop ${fieldName}
+        </foreach>
+    </update>
+
     <update id="renameField">
         alter table ${tableName} rename column ${fieldName} to ${toFieldName}
     </update>
-    <update id="generateComment">
-        comment on column
+
+    <update id="generateComment" databaseId="oracle">
+        comment
+        on column
         ${tableName}
         .
-        ${field}
+        ${field.name}
         is
-        &apos;${comment}&apos;
+        '${field.comment}'
     </update>
 
-    <update id="updateField">
+    <update id="generateComment" databaseId="mysql">
         alter table ${tableName}
-            modify (<include refid="fieldInfo"/>)
+        modify column
+        <include refid="fieldInfo"/>
+        comment '${field.comment}'
     </update>
 
-    <select id="getTypes" resultType="com.panshicloud.base.dao.dos.FieldTypeDo">
-        select  COLUMN_NAME as fieldName,DATA_TYPE as type
-        from user_tab_columns
+    <update id="batchGenerateComment" databaseId="oracle">
+        <foreach collection="fields" item="field">
+            <![CDATA[
+            comment
+            on column
+            ${tableName}
+            .
+            ${field.name}
+            is
+            '${field.comment}';
+            ]]>
+        </foreach>
+    </update>
+
+    <update id="batchGenerateComment" databaseId="mysql">
+        alter table ${tableName}
+        <foreach collection="fields" item="field" separator=",">
+            modify column
+            <include refid="fieldInfo"/>
+            comment '${field.comment}'
+        </foreach>
+    </update>
+
+    <update id="updateField" databaseId="oracle">
+        alter table ${tableName}
+        modify (<include refid="fieldInfo"/>)
+    </update>
+
+    <update id="updateField" databaseId="mysql">
+        alter table ${tableName}
+        modify
+        <include refid="fieldInfo"/>
+    </update>
+
+    <select id="getTypes" resultType="com.panshicloud.base.dao.dos.FieldTypeDo" databaseId="oracle">
+        select COLUMN_NAME as fieldName, DATA_TYPE as type
+        from all_tab_columns
         WHERE table_name = UPPER('${tableName}')
+          AND owner = UPPER('${tableSpace}')
     </select>
 
+    <select id="getTypes" resultType="com.panshicloud.base.dao.dos.FieldTypeDo" databaseId="mysql">
+        select COLUMN_NAME as fieldName, DATA_TYPE as type
+        from information_schema.COLUMNS
+        WHERE table_name = '${tableName}'
+          AND table_schema = '${tableSpace}'
+    </select>
 
-    <sql id="fieldInfo">
+    <sql id="fieldInfo" databaseId="oracle">
         ${field.name}
         <choose>
             <when test="field.type == 0">
@@ -155,6 +279,33 @@
             </when>
             <when test="field.type == 2">
                 NUMBER(11,2)
+            </when>
+            <when test="field.type == 3">
+                date
+            </when>
+            <when test="field.type == 4">
+                date
+            </when>
+            <when test="field.type == 5">
+                clob
+            </when>
+        </choose>
+        <if test="field.isAllowNull == 0">
+            NOT NULL
+        </if>
+    </sql>
+
+    <sql id="fieldInfo" databaseId="mysql">
+        ${field.name}
+        <choose>
+            <when test="field.type == 0">
+                varchar(${field.length})
+            </when>
+            <when test="field.type == 1">
+                int(11)
+            </when>
+            <when test="field.type == 2">
+                double(11,2)
             </when>
             <when test="field.type == 3">
                 date

@@ -10,4 +10,11 @@ public class CommonCst {
 
     public static final String SYSTEM_CONFIG_DEFAULT_GROUP = "default";
 
+    public static final String MENU_PARAMETER_BTN = "Btns";
+
+    public static final String LEFT_BRACKET = "[";
+
+    public static final String RIGHT_BRACKET =  "]";
+
+
 }

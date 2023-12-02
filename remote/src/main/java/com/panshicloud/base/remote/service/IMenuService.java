@@ -1,6 +1,7 @@
 package com.panshicloud.base.remote.service;
 
 import com.panshicloud.base.remote.dto.MenuDto;
+import com.panshicloud.base.remote.dto.MenuEnablePermissionDto;
 import com.panshicloud.base.remote.dto.MenuInsertDto;
 import com.panshicloud.base.remote.dto.MenuUpdateDto;
 
@@ -20,6 +21,15 @@ public interface IMenuService {
      * @return List
      */
     List<MenuDto> findByAppId(String appId);
+
+
+    /**
+     * 获取开启权限的所有菜单
+     *
+     * @param appId 所属应用
+     * @return List
+     */
+    List<MenuEnablePermissionDto> findEnablePermissionByAppId(String appId);
 
     /**
      * 薪增菜单

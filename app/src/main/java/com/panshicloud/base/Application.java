@@ -5,6 +5,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 
 /**
@@ -14,8 +15,9 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
  * @Version: 1.0
  */
 @MapperScan({"com.panshicloud.base.dao.mapper"})
-@EnableOperationLog
 @SpringBootApplication
+@EnableOperationLog
+@EnableAsync
 @ServletComponentScan(basePackages = "com.panshicloud.common.filter")
 public class Application {
 

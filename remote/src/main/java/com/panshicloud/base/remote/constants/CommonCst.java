@@ -21,6 +21,7 @@ public class CommonCst {
 
 
     public static final String TABLE_FIELD_VARCHAR2 = "VARCHAR2";
+    public static final String TABLE_FIELD_VARCHAR = "varchar";
     public static final String TABLE_FIELD_DATE = "DATE";
     public static final String TABLE_FIELD_CLOB = "CLOB";
 

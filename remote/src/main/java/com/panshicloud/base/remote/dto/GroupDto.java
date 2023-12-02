@@ -2,6 +2,8 @@ package com.panshicloud.base.remote.dto;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * <p>
  * 分组Dto
@@ -11,7 +13,7 @@ import lombok.Data;
  * @date 2023/6/15
  */
 @Data
-public class GroupDto {
+public class GroupDto implements Serializable {
 
     private String code;
 

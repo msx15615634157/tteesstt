@@ -1,8 +1,8 @@
 package com.panshicloud.base.dao.mapper;
 
+import com.panshicloud.base.dao.dos.FieldCommentDo;
 import com.panshicloud.base.dao.dos.FieldTypeDo;
 import com.panshicloud.base.dao.dos.GenerateTableFieldDo;
-import com.panshicloud.base.dao.dos.FieldCommentDo;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
@@ -58,9 +58,16 @@ public interface GenerateTableMapper {
      *
      * @param tableName 表名
      * @param field     字段名
-     * @param comment   表字段注释
      */
-    void generateComment(@Param("tableName") String tableName, @Param("field") String field, @Param("comment") String comment);
+    void generateComment(@Param("tableName") String tableName, @Param("field") GenerateTableFieldDo field);
+
+    /**
+     * 生成
+     *
+     * @param tableName 表名
+     * @param fields    字段列表
+     */
+    void batchGenerateComment(@Param("tableName") String tableName, @Param("fields") List<GenerateTableFieldDo> fields);
 
     /**
      * 删除表
@@ -98,10 +105,11 @@ public interface GenerateTableMapper {
     /**
      * 按表查索引
      *
-     * @param tableName 表名
+     * @param tableName  表名
+     * @param tableSpace 表空间
      * @return 索引
      */
-    List<String> findIndex(@Param("tableName") String tableName);
+    List<String> findIndex(@Param("tableName") String tableName, @Param("tableSpace") String tableSpace);
 
     /**
      * 新增字段
@@ -190,8 +198,9 @@ public interface GenerateTableMapper {
     /**
      * 获取所有表字段类型
      *
-     * @param tableName 表名
+     * @param tableName  表名
+     * @param tableSpace 表空间
      * @return
      */
-    List<FieldTypeDo> getTypes(@Param("tableName") String tableName);
+    List<FieldTypeDo> getTypes(@Param("tableName") String tableName, @Param("tableSpace") String tableSpace);
 }
