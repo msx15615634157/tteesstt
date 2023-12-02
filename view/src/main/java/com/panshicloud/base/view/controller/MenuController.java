@@ -1,12 +1,15 @@
 package com.panshicloud.base.view.controller;
 
+import com.panshicloud.base.operationlog.OperationLog;
 import com.panshicloud.base.remote.dto.AppDto;
+import com.panshicloud.base.remote.dto.MenuDto;
 import com.panshicloud.base.remote.dto.MenuInsertDto;
 import com.panshicloud.base.remote.dto.MenuUpdateDto;
 import com.panshicloud.base.remote.service.IAppService;
 import com.panshicloud.base.remote.service.IMenuParameterService;
 import com.panshicloud.base.remote.service.IMenuService;
 import com.panshicloud.base.view.vo.request.*;
+import com.panshicloud.base.view.vo.response.MenuEnablePermissionResponseVo;
 import com.panshicloud.base.view.vo.response.MenuParameterResponseVo;
 import com.panshicloud.base.view.vo.response.MenuResponseVo;
 import com.panshicloud.common.base.request.IdRequestVo;
@@ -49,8 +52,15 @@ public class MenuController {
         return new GenericResponseVo<>(ConvertHelper.tToV(menuService.findByAppId(vo.getAppId()), MenuResponseVo.class));
     }
 
+    @ApiOperation("通过所属应用查询菜单")
+    @PostMapping("/findEnablePermissionByAppId")
+    public GenericResponseVo<List<MenuEnablePermissionResponseVo>> findEnablePermissionByAppId(@RequestBody @Validated MenuFindRequestVo vo) {
+        return new GenericResponseVo(ConvertHelper.tToV(menuService.findEnablePermissionByAppId(vo.getAppId()), MenuEnablePermissionResponseVo.class));
+    }
+
     @ApiOperation("新增菜单")
     @PostMapping("/insert")
+    @OperationLog(type = "菜单-新增", operation = "新增菜单", value = "'应用Id='+#vo.appId+'菜单编码='+#vo.code+'菜单名称='+#vo.name+'菜单类型='+#vo.type+'父级菜单id='+#vo.parentId+'路由名称='+#vo.routerName+'菜单参数='+#vo.param")
     public SuccessResponseVo insert(@RequestBody @Validated MenuInsetRequestVo vo) {
         menuService.insert(ConvertHelper.tToV(vo, MenuInsertDto.class));
         return ResponseHelper.SUCCESS;
@@ -58,6 +68,7 @@ public class MenuController {
 
     @ApiOperation("修改菜单")
     @PostMapping("/update")
+    @OperationLog(type = "菜单-更新", operation = "修改菜单", value = "'应用Id='+#vo.appId+'菜单编码='+#vo.code+'菜单名称='+#vo.name+'菜单类型='+#vo.type+'父级菜单id='+#vo.parentId+'路由名称='+#vo.routerName+'菜单参数='+#vo.param")
     public SuccessResponseVo update(@RequestBody @Validated MenuUpdateRequestVo vo) {
         menuService.update(ConvertHelper.tToV(vo, MenuUpdateDto.class));
         return ResponseHelper.SUCCESS;
@@ -65,6 +76,7 @@ public class MenuController {
 
     @ApiOperation("更新排序")
     @PostMapping("/updateSort")
+    @OperationLog(type = "菜单-更新排序", operation = "修改菜单排序", value = "'菜单id='+#vo.id+'排序='+#vo.sort")
     public SuccessResponseVo updateSort(@RequestBody @Validated MenuUpdateSortRequestVo vo) {
         menuService.updateSort(vo.getId(), vo.getSort(), vo.getParentId());
         return ResponseHelper.SUCCESS;
@@ -72,6 +84,7 @@ public class MenuController {
 
     @ApiOperation("删除")
     @PostMapping("/delete")
+    @OperationLog(type = "菜单-删除", operation = "删除菜单", value = "'菜单id='+#vo.id")
     public SuccessResponseVo batchDelete(@RequestBody @Validated IdRequestVo vo) {
         menuService.delete(vo.getId());
         return ResponseHelper.SUCCESS;
@@ -97,6 +110,27 @@ public class MenuController {
     @PostMapping("/findParameters")
     public GenericResponseVo<List<MenuParameterResponseVo>> findParameters(@RequestBody @Validated IdRequestVo vo) {
         return new GenericResponseVo<>(ConvertHelper.tToV(menuParameterService.findByMenuId(vo.getId()), MenuParameterResponseVo.class));
+    }
+
+//    暂不使用
+//    @ApiOperation("查询菜单参数")
+//    @PostMapping("/findEnablePermissions")
+//    public GenericResponseVo<List<MenuParameterResponseVo>> findEnablePermissions(@RequestBody @Validated IdRequestVo vo) {
+//        return new GenericResponseVo<>(ConvertHelper.tToV(menuParameterService.findEnablePermissions(vo.getId()), MenuParameterResponseVo.class));
+//    }
+
+    @ApiOperation("根据菜单编码查询菜单参数")
+    @PostMapping("/findParametersByCode")
+    public GenericResponseVo<List<MenuParameterResponseVo>> findParametersByCode(@RequestBody @Validated MenuGetRequestVo vo) {
+        AppDto app = appService.getByCode(vo.getAppCode());
+        if (app == null) {
+            throw ExceptionHelper.newException(JpErrorCodeCst.SYSTEM_ERROR, "应用不存在");
+        }
+        MenuDto menu = menuService.getByCode(app.getId(), vo.getCode());
+        if (menu == null) {
+            throw ExceptionHelper.newException(JpErrorCodeCst.SYSTEM_ERROR, "菜单不存在");
+        }
+        return new GenericResponseVo<>(ConvertHelper.tToV(menuParameterService.findByMenuId(menu.getId()), MenuParameterResponseVo.class));
     }
 
 }

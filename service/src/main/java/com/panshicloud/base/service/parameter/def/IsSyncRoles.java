@@ -25,7 +25,7 @@ public class IsSyncRoles extends AbstractParameter{
 
     @Override
     public String name() {
-        return "是否同步用户权限开关";
+        return "河北一体化权限同步-同步角色";
     }
 
     @Override
@@ -35,7 +35,7 @@ public class IsSyncRoles extends AbstractParameter{
 
     @Override
     public String description() {
-        return "是否同步用户权限";
+        return "同步用户的角色";
     }
 
     @Override

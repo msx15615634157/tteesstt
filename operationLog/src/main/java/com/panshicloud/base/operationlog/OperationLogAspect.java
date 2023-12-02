@@ -1,7 +1,7 @@
 package com.panshicloud.base.operationlog;
 
 import com.panshicloud.base.remote.dto.OperationLogDto;
-import com.panshicloud.base.remote.service.IOperationLogService;
+import com.panshicloud.base.remote.service.IOperationLogDataService;
 import com.panshicloud.common.utils.StringUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -39,7 +39,7 @@ import java.lang.reflect.Method;
 public class OperationLogAspect {
 
     @DubboReference
-    private IOperationLogService operationLogService;
+    private IOperationLogDataService operationLogService;
 
     @Autowired(required = false)
     private HttpServletRequest request;
@@ -59,6 +59,8 @@ public class OperationLogAspect {
 
     @Around("pointcutInterface()")
     public Object exec(ProceedingJoinPoint joinPoint) throws Throwable {
+        String type = null;
+        String operation = null;
         try {
             MethodSignature signature = (MethodSignature) joinPoint.getSignature();
             Class<?> clazz = joinPoint.getTarget().getClass();
@@ -66,7 +68,7 @@ public class OperationLogAspect {
             Object[] args = joinPoint.getArgs();
             OperationLog operationLog = method.getAnnotation(OperationLog.class);
             // 获取类型
-            String type = operationLog.type();
+            type = operationLog.type();
             Api api = clazz.getAnnotation(Api.class);
             if (StringUtils.isBlank(type)) {
                 if (api != null) {
@@ -81,7 +83,7 @@ public class OperationLogAspect {
                 }
             }
             // 获取操作
-            String operation = operationLog.operation();
+            operation = operationLog.operation();
             ApiOperation apiOperation = method.getAnnotation(ApiOperation.class);
             if (StringUtils.isBlank(operation)) {
                 if (apiOperation != null) {
@@ -114,7 +116,7 @@ public class OperationLogAspect {
             entity.setLogInfo(info);
             entity.setInterfaceName(clazz.getName());
             entity.setServerIp(this.request.getLocalAddr());
-            entity.setClientIp(this.request.getRemoteAddr());
+            entity.setClientIp(StringUtils.split(this.request.getHeader("X-Forwarded-For"))[0]);
             entity.setClientCode(this.request.getHeader("User-Agent"));
             entity.setUri(this.request.getRequestURI());
             entity.setUrl(this.request.getRequestURL().toString());
@@ -122,7 +124,7 @@ public class OperationLogAspect {
             entity.setQueryString(this.request.getQueryString());
             operationLogService.insert(entity);
         } catch (Exception e) {
-            log.error("保存操作日志异常");
+            log.error("保存操作日志异常，异常位置：" + type + "模块的" + operation + "操作");
             e.printStackTrace();
         }
         return joinPoint.proceed();

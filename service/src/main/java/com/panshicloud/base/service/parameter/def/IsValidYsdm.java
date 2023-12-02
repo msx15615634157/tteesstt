@@ -25,7 +25,7 @@ public class IsValidYsdm extends AbstractParameter{
 
     @Override
     public String name() {
-        return "单点校验单位时增加预算代码";
+        return "河北一体化单点登录-校验单位时增加预算代码匹配";
     }
 
     @Override
@@ -35,7 +35,7 @@ public class IsValidYsdm extends AbstractParameter{
 
     @Override
     public String description() {
-        return "是否单点校验单位时增加预算代码";
+        return "登录时校验本系统用户的所属单位是否与一体化一致，默认使用一体化的区划字段匹配，开启后，则使用一体化的区划+预算单位字段来匹配。建议：部门决算系统匹配区划+预算单位代码；总决算系统校验区划代码";
     }
 
     @Override

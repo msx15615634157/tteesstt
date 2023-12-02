@@ -23,7 +23,7 @@ public class SyncRolesExclude extends AbstractParameter{
 
     @Override
     public String name() {
-        return "禁用用户同步用户权限";
+        return "河北一体化权限同步-禁用同步角色的用户";
     }
 
     @Override
@@ -33,7 +33,7 @@ public class SyncRolesExclude extends AbstractParameter{
 
     @Override
     public String description() {
-        return "禁用用户同步用户权限 （一个或多个，逗号隔开）";
+        return "禁用同步角色的用户列表，一个或多个，逗号隔开";
     }
 
     @Override

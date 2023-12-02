@@ -8,6 +8,7 @@ import com.panshicloud.base.parameter.AbstractGroup;
 import com.panshicloud.base.parameter.AbstractParameter;
 import com.panshicloud.base.parameter.AbstractTab;
 import com.panshicloud.base.remote.dto.*;
+import com.panshicloud.base.remote.service.IParameterService;
 import com.panshicloud.base.remote.service.ISystemConfigService;
 import com.panshicloud.base.service.constants.CommonCst;
 import com.panshicloud.base.service.constants.ErrorCodeCst;
@@ -17,6 +18,7 @@ import com.panshicloud.common.constants.JpErrorCodeCst;
 import com.panshicloud.common.helper.ConvertHelper;
 import com.panshicloud.common.helper.ExceptionHelper;
 import com.panshicloud.common.utils.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.apache.dubbo.rpc.service.GenericService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,7 @@ import java.util.Optional;
  * @since 2022/12/22
  */
 @DubboService
+@Slf4j
 public class SystemConfigServiceProvider extends ServiceImpl<SystemConfigMapper, SystemConfig> implements ISystemConfigService {
 
     @Autowired
@@ -80,7 +83,7 @@ public class SystemConfigServiceProvider extends ServiceImpl<SystemConfigMapper,
                 systemConfig.setCode(parameter.code());
                 // 如果配置对象存在，则向参数中set值
                 if (optional.isPresent()) {
-                    systemConfig.setValue(format(String.valueOf(optional.get().getValue()), parameter.dataType()));
+                    systemConfig.setValue(format(optional.get().getValue(), parameter.dataType()));
                     rst.add(systemConfig);
                     continue;
                 }
@@ -90,6 +93,7 @@ public class SystemConfigServiceProvider extends ServiceImpl<SystemConfigMapper,
                 systemConfigInsertDto.setGroupCode(abstractGroup.code());
                 systemConfigInsertDto.setValue(parameter.getValue());
                 this.insert(systemConfigInsertDto);
+                systemConfig.setValue(parameter.getValue());
                 rst.add(systemConfig);
             }
         }
@@ -140,7 +144,7 @@ public class SystemConfigServiceProvider extends ServiceImpl<SystemConfigMapper,
 
     @Override
     public List<GroupDto> findGroupDefine() {
-        return parameterConfig.getGroupList();
+        return ConvertHelper.tToV(parameterConfig.getGroupList(), GroupDto.class);
     }
 
     @Override
@@ -173,7 +177,7 @@ public class SystemConfigServiceProvider extends ServiceImpl<SystemConfigMapper,
                     value = optional.get().getValue();
                 }
                 // 格式化数据
-                value = format(String.valueOf(value), parameter.dataType());
+                value = format(value, parameter.dataType());
                 GroupParameterDto.Tab.Parameter tabParameter = ConvertHelper.tToV(parameter, GroupParameterDto.Tab.Parameter.class);
                 tabParameter.setValue(value);
                 tabParameter.setCode(parameter.code());
@@ -207,7 +211,8 @@ public class SystemConfigServiceProvider extends ServiceImpl<SystemConfigMapper,
         if (StringUtils.equals(groupCode, CommonCst.SYSTEM_CONFIG_DEFAULT_GROUP)) {
             return defaultParameter;
         }
-        for (GroupDto groupDto : parameterConfig.getGroupList()) {
+        List<GroupDto> groupDtos = ConvertHelper.tToV(parameterConfig.getGroupList(), GroupDto.class);
+        for (GroupDto groupDto : groupDtos) {
             if (StringUtils.equals(groupDto.getCode(), groupCode)) {
                 String rst;
                 // 获取一个参数
@@ -215,6 +220,7 @@ public class SystemConfigServiceProvider extends ServiceImpl<SystemConfigMapper,
                 try {
                     genericService = systemConfigRemote.getGenericService(groupDto.getInterfaceName(), groupDto.getName());
                 } catch (Exception e) {
+                    log.info("detailMessage:" + e.getMessage());
                     throw ExceptionHelper.newException(JpErrorCodeCst.SYSTEM_ERROR, groupDto.getName() + "服务未上线");
                 }
                 rst = (String) genericService.$invoke("getParameter", new String[]{"java.lang.String"}, new String[]{groupDto.getCode()});
@@ -241,18 +247,32 @@ public class SystemConfigServiceProvider extends ServiceImpl<SystemConfigMapper,
         this.saveOrUpdateBatch(ConvertHelper.tToV(updates, SystemConfig.class));
     }
 
-    private static Object format(String n, Integer dataType) {
+    /**
+     * 仅用于格式化参数value，因为参数value值库中存varchar，都可以转String
+     */
+    private static Object format(Object obj, Integer dataType) {
+        String str = formatStr(obj);
         switch (dataType) {
             case 0:
-                return n;
+                return str;
             case 1:
-                return Integer.parseInt(n);
+                return Integer.parseInt(str);
             case 2:
-                return Float.parseFloat(n);
+                return Float.parseFloat(str);
             case 3:
-                return Double.parseDouble(n);
+                return Double.parseDouble(str);
             default:
         }
         throw ExceptionHelper.newException(JpErrorCodeCst.SYSTEM_ERROR, "参数类型不存在");
+    }
+
+    public static String formatStr(Object value) {
+        if (value == null) {
+            return "";
+        }
+        if (value instanceof String) {
+            return (String) value;
+        }
+        return String.valueOf(value);
     }
 }

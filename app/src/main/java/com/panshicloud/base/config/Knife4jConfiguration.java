@@ -43,7 +43,7 @@ public class Knife4jConfiguration {
     }
 
     private Contact getContact() {
-        return new Contact("-", "-", "-");
+        return new Contact("磐石云创", "https://www.panshicloud.com", "admin@panshicloud.com");
     }
 
 }

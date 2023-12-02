@@ -25,7 +25,7 @@ public class IsSyncUserAutoAddDiv extends AbstractParameter{
 
     @Override
     public String name() {
-        return "同步用户账号添加区划前缀";
+        return "河北一体化用户同步-用户账号添加区划前缀";
     }
 
     @Override
@@ -35,7 +35,7 @@ public class IsSyncUserAutoAddDiv extends AbstractParameter{
 
     @Override
     public String description() {
-        return "是否同步用户账号添加区划前缀";
+        return "开启后，一体化同步用户账号时，添加区划代码作为用户名的前缀，适用于存在不同区划下相同账号名的情况";
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.panshicloud.base.dao.entity.Menu;
 import com.panshicloud.base.dao.mapper.MenuMapper;
 import com.panshicloud.base.remote.dto.MenuDto;
+import com.panshicloud.base.remote.dto.MenuEnablePermissionDto;
 import com.panshicloud.base.remote.dto.MenuInsertDto;
 import com.panshicloud.base.remote.dto.MenuUpdateDto;
 import com.panshicloud.base.remote.service.IMenuParameterService;
@@ -39,12 +40,14 @@ public class MenuServiceProvider extends ServiceImpl<MenuMapper, Menu> implement
 
     @Override
     public List<MenuDto> findByAppId(String appId) {
-        //查询菜单，并排序
-        LambdaQueryWrapper<Menu> query = new LambdaQueryWrapper<>();
-        query.eq(Menu::getAppId, appId);
-        query.orderByAsc(Menu::getSort);
-        List<MenuDto> menuList = ConvertHelper.tToV(menuMapper.selectList(query), MenuDto.class);
+        List<MenuDto> menuList = find(appId);
         return toTree(menuList, rootParentId);
+    }
+
+    @Override
+    public List<MenuEnablePermissionDto> findEnablePermissionByAppId(String appId) {
+        List<MenuDto> menus = find(appId);
+        return menuParameterService.findEnablePermissions(menus);
     }
 
     @Override
@@ -67,10 +70,10 @@ public class MenuServiceProvider extends ServiceImpl<MenuMapper, Menu> implement
         Menu menu = ConvertHelper.tToV(insert, Menu.class);
         if (insert.getCurrentSort() != null) {
             // 当前排序加1
-            menu.setSort(insert.getCurrentSort()+1);
+            menu.setSort(insert.getCurrentSort() + 1);
             // 比当前排序大的都加1
             lambdaUpdate()
-                    .eq(Menu::getAppId,insert.getAppId())
+                    .eq(Menu::getAppId, insert.getAppId())
                     .eq(Menu::getParentId, insert.getParentId())
                     .gt(Menu::getSort, insert.getCurrentSort())
                     .setSql("sort = sort + 1")
@@ -192,4 +195,18 @@ public class MenuServiceProvider extends ServiceImpl<MenuMapper, Menu> implement
         return result;
     }
 
+    /**
+     * 通过appId查询菜单List
+     *
+     * @param appId appId
+     * @return
+     */
+    private List<MenuDto> find(String appId) {
+        //查询菜单，并排序
+        LambdaQueryWrapper<Menu> query = new LambdaQueryWrapper<>();
+        query.eq(Menu::getAppId, appId);
+        query.orderByAsc(Menu::getSort);
+        List<MenuDto> menuList = ConvertHelper.tToV(menuMapper.selectList(query), MenuDto.class);
+        return menuList;
+    }
 }

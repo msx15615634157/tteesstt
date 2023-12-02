@@ -23,10 +23,6 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.panshicloud.base</groupId>
-      <artifactId>remote</artifactId>
-    </dependency>
   </dependencies>
 
   <build>

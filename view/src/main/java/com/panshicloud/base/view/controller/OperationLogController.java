@@ -1,6 +1,6 @@
 package com.panshicloud.base.view.controller;
 
-import com.panshicloud.base.remote.service.IOperationLogService;
+import com.panshicloud.base.remote.service.IOperationLogDataService;
 import com.panshicloud.base.view.vo.request.OperationLogLikeRequestVo;
 import com.panshicloud.base.view.vo.response.OperationLogResponseVo;
 import com.panshicloud.common.base.response.GenericResponseVo;
@@ -16,7 +16,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.concurrent.TimeUnit;
 
@@ -30,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 public class OperationLogController {
 
     @DubboReference
-    private IOperationLogService operationLogService;
+    private IOperationLogDataService operationLogDataService;
 
     @Autowired
     private RedisTemplate redisTemplate;
@@ -38,7 +41,7 @@ public class OperationLogController {
     @ApiOperation("查询操作日志-分页")
     @PostMapping("/findPage")
     public GenericResponseVo<PageResponseVo<OperationLogResponseVo>> findPage(@RequestBody @Validated OperationLogLikeRequestVo vo) {
-        return new GenericResponseVo<>(new PageResponseVo<>(operationLogService.findPage(vo.getPageNumber(), vo.getPageSize(), vo.getStartTime(), vo.getEndTime(), vo.getType(), vo.getOperation(), vo.getOperationUserId()), OperationLogResponseVo.class));
+        return new GenericResponseVo<>(new PageResponseVo<>(operationLogDataService.findPage(vo.getPageNumber(), vo.getPageSize(), vo.getStartTime(), vo.getEndTime(), vo.getType(), vo.getOperation(), vo.getOperationUserId()), OperationLogResponseVo.class));
     }
 
     @ApiOperation("准备导出")
@@ -63,7 +66,7 @@ public class OperationLogController {
         try {
             response.setHeader("Content-Disposition", "attachment;fileName=" + URLEncoder.encode("日志", "utf-8") + ".zip");
             OutputStream outputStream = response.getOutputStream();
-            ByteArrayOutputStream byteArrayOutputStream = operationLogService.archiveExport(vo.getStartTime(), vo.getEndTime(), vo.getType(), vo.getOperation(), vo.getOperationUserId());
+            ByteArrayOutputStream byteArrayOutputStream = operationLogDataService.archiveExport(vo.getStartTime(), vo.getEndTime(), vo.getType(), vo.getOperation(), vo.getOperationUserId());
             byteArrayOutputStream.writeTo(outputStream);
             outputStream.flush();
             outputStream.close();
@@ -72,7 +75,7 @@ public class OperationLogController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        operationLogService.delete(vo.getStartTime(), vo.getEndTime(), vo.getType(), vo.getOperation(), vo.getOperationUserId());
+        operationLogDataService.delete(vo.getStartTime(), vo.getEndTime(), vo.getType(), vo.getOperation(), vo.getOperationUserId());
         return new GenericResponseVo<>("归档导出成功");
     }
 }

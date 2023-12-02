@@ -24,7 +24,7 @@ public class IsSyncUnits extends AbstractParameter {
 
     @Override
     public String name() {
-        return "是否同步单位权限开关";
+        return "河北一体化权限同步-单位权限";
     }
 
     @Override
@@ -34,7 +34,7 @@ public class IsSyncUnits extends AbstractParameter {
 
     @Override
     public String description() {
-        return "是否同步单位权限";
+        return "同步用户的单位权限";
     }
 
     @Override
