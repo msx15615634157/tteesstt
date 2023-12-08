@@ -1,2 +1,0 @@
-CommonContextConsumerFilter=com.panshicloud.common.context.filter.CommonContextConsumerFilter
-CommonContextProviderFilter=com.panshicloud.common.context.filter.CommonContextProviderFilter
