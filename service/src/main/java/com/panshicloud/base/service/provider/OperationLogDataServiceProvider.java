@@ -27,13 +27,9 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * <p>
- * 操作日志服务实现类
- * </p>
- *
- * @author huangrankun
+ * @author xingxingfa
+ * @since 2023/11/24
  */
-
 @DubboService
 public class OperationLogDataServiceProvider extends ServiceImpl<OperationLogMapper, OperationLog> implements IOperationLogDataService {
 
@@ -41,8 +37,8 @@ public class OperationLogDataServiceProvider extends ServiceImpl<OperationLogMap
     private OperationLogMapper operationLogMapper;
 
     @Override
-    public boolean insert(OperationLogDto operationLogDto) {
-        return save(ConvertHelper.tToV(operationLogDto, OperationLog.class));
+    public void insert(OperationLogDto operationLogDto) {
+        save(ConvertHelper.tToV(operationLogDto, OperationLog.class));
     }
 
     @Override

@@ -9,22 +9,16 @@ import java.io.ByteArrayOutputStream;
 import java.util.Date;
 
 /**
- * <p>
- * 操作日志服务
- * </p>
- *
- * @author huangrankun
+ * @author xingxingfa
+ * @since 2023/11/24
  */
-
 public interface IOperationLogDataService {
-
     /**
      * 新增
      *
      * @param operationLogDto 操作日志
-     * @return 是否成功
      */
-    boolean insert(OperationLogDto operationLogDto);
+    void insert(OperationLogDto operationLogDto);
 
     /**
      * 删除-按时间

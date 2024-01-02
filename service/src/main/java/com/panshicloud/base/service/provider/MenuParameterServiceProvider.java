@@ -9,10 +9,15 @@ import com.panshicloud.base.remote.dto.MenuDto;
 import com.panshicloud.base.remote.dto.MenuEnablePermissionDto;
 import com.panshicloud.base.remote.dto.MenuParameterDto;
 import com.panshicloud.base.remote.service.IMenuParameterService;
+import com.panshicloud.base.service.constants.RedisKeyCst;
 import com.panshicloud.common.helper.ConvertHelper;
 import com.panshicloud.common.utils.StringUtils;
 import org.apache.dubbo.config.annotation.DubboService;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,12 +32,17 @@ import java.util.stream.Collectors;
 @DubboService
 public class MenuParameterServiceProvider extends ServiceImpl<MenuParameterMapper, MenuParameter> implements IMenuParameterService {
 
+    @Resource
+    private RedisTemplate redisTemplate;
+
     @Override
+    @CacheEvict(value = RedisKeyCst.MENU_PARAMETER, key = "#menuId")
     public void deleteByMenuId(String menuId) {
         lambdaUpdate().eq(MenuParameter::getMenuId, menuId).remove();
     }
 
     @Override
+    @Cacheable(value = RedisKeyCst.MENU_PARAMETER, key = "#menuId")
     public List<MenuParameterDto> findByMenuId(String menuId) {
         List<MenuParameter> find = lambdaQuery().eq(MenuParameter::getMenuId, menuId).list();
         List<MenuParameterDto> rst = new ArrayList<>();
@@ -58,7 +68,7 @@ public class MenuParameterServiceProvider extends ServiceImpl<MenuParameterMappe
         Map<String, List<MenuParameter>> groupMenu = allMenuParameter.stream().sorted(Comparator.comparing(MenuParameter::getMenuId)).collect(Collectors.groupingBy(MenuParameter::getMenuId));
         for (String menuId : groupMenu.keySet()) {
             Optional<MenuDto> optional = menus.stream().filter(it -> it.getId().equals(menuId)).findAny();
-            if (!optional.isPresent()){
+            if (!optional.isPresent()) {
                 continue;
             }
             MenuEnablePermissionDto menuEnablePermission = ConvertHelper.tToV(optional.get(), MenuEnablePermissionDto.class);
@@ -72,6 +82,10 @@ public class MenuParameterServiceProvider extends ServiceImpl<MenuParameterMappe
                 parameter.setValue(StringUtils.isBlank(menuParameter.getValue()) ? "" : StringUtils.toObject(menuParameter.getValue()));
                 // 包含按钮权限的
                 if (menuParameter.getIsTab() != null && "true".equalsIgnoreCase(menuParameter.getIsTab())) {
+                    // todo 临时过滤报错，前端传非json字符串问题
+                    if (StringUtils.equals("\"\"", parameter.getValue())) {
+                        parameter.setValue("[]");
+                    }
                     List<BtnParameterDto> btnParameterList = JSONObject.parseArray((String) parameter.getValue(), BtnParameterDto.class);
                     List<BtnParameterDto> btnParameters = btnParameterList.stream().filter(it -> it.getIsPermission() != null && it.getIsPermission()).collect(Collectors.toList());
                     if (btnParameters.size() > 0) {
@@ -89,6 +103,7 @@ public class MenuParameterServiceProvider extends ServiceImpl<MenuParameterMappe
     }
 
     @Override
+    @CacheEvict(value = RedisKeyCst.MENU_PARAMETER, key = "#menuId")
     public void update(String menuId, List<MenuParameterDto> parameters) {
         List<MenuParameter> updates = new ArrayList<>();
         for (MenuParameterDto parameter : parameters) {

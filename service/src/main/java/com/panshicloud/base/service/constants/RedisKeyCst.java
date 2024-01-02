@@ -16,4 +16,9 @@ public class RedisKeyCst {
      */
     public static final String MENU_PARAMETER_INSERT_LOCK = "MenuParameterStatusInsertLock";
 
+    /**
+     * 菜单参数
+     */
+    public static final String MENU_PARAMETER = "menu-parameter:";
+
 }

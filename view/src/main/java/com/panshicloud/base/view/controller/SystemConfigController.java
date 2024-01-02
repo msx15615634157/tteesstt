@@ -1,5 +1,6 @@
 package com.panshicloud.base.view.controller;
 
+import com.panshicloud.base.operationlog.OperationLog;
 import com.panshicloud.base.remote.dto.SystemConfigDto;
 import com.panshicloud.base.remote.dto.SystemConfigInsertOrUpdateDto;
 import com.panshicloud.base.remote.dto.SystemConfigUpdateDto;
@@ -70,6 +71,7 @@ public class SystemConfigController {
 
     @ApiOperation("更新")
     @PostMapping("/batchUpdate")
+    @OperationLog("'分组编码=' + #vo.groupCode+ '，参数=' + #vo.parameters")
     public SuccessResponseVo update(@RequestBody @Validated SystemParameterUpdateRequestVo vo) {
         List<SystemConfigUpdateDto> systemConfigUpdates = new ArrayList<>();
         List<SystemParameterUpdateRequestVo.SystemParameter> parameters = vo.getParameters();

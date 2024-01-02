@@ -38,6 +38,7 @@
         <dependency>
             <groupId>com.panshicloud.base</groupId>
             <artifactId>operationlog</artifactId>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

@@ -34,6 +34,7 @@ public class DefaultTab extends AbstractTab {
         rst.add(new IsValidYsdm());
         rst.add(new FinIntegrateHebAppointRoleSyncRolesExclude());
         rst.add(new FinIntegrateHebAppointRoleSyncUnitsExclude());
+        rst.add(new FinIntegrateUnifyOrganizationManage());
         return rst;
     }
 

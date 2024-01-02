@@ -60,4 +60,5 @@ public class MenuUpdateRequestVo {
 
     @ApiModelProperty(value = "菜单参数", required = true)
     private List<MenuParameterDto> param;
+
 }
