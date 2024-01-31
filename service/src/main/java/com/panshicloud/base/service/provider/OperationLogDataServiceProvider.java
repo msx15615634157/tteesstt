@@ -42,6 +42,11 @@ public class OperationLogDataServiceProvider extends ServiceImpl<OperationLogMap
     }
 
     @Override
+    public void insertBatch(List<OperationLogDto> operationLogs) {
+        saveBatch(ConvertHelper.tToV(operationLogs, OperationLog.class));
+    }
+
+    @Override
     public void deleteByData(Data data) {
         lambdaUpdate()
                 .gt(OperationLog::getOperationTime, data)

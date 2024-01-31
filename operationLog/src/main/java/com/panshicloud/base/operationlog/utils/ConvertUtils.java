@@ -51,7 +51,8 @@ public class ConvertUtils {
 
     private static void setRequest(OperationLogDto entity, HttpServletRequest request) {
         entity.setServerIp(request.getLocalAddr());
-        entity.setClientIp(StringUtils.split(request.getHeader("X-Forwarded-For"))[0]);
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        entity.setClientIp(StringUtils.isBlank(xForwardedFor) ? xForwardedFor : StringUtils.split(request.getHeader("X-Forwarded-For"))[0]);
         entity.setClientCode(request.getHeader("User-Agent"));
         entity.setUri(request.getRequestURI());
         entity.setUrl(request.getRequestURL().toString());

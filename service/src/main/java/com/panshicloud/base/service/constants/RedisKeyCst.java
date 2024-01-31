@@ -21,4 +21,9 @@ public class RedisKeyCst {
      */
     public static final String MENU_PARAMETER = "menu-parameter:";
 
+    /**
+     *
+     */
+    public static final String OPERATION_LOG_QUEUE = "operation:log:queue";
+
 }

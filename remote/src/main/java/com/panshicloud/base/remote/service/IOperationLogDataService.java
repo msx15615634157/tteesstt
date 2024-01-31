@@ -7,6 +7,7 @@ import com.panshicloud.common.base.PageDto;
 import javax.xml.crypto.Data;
 import java.io.ByteArrayOutputStream;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author xingxingfa
@@ -19,6 +20,13 @@ public interface IOperationLogDataService {
      * @param operationLogDto 操作日志
      */
     void insert(OperationLogDto operationLogDto);
+
+    /**
+     * 批量新增
+     *
+     * @param operationLogs
+     */
+    void insertBatch(List<OperationLogDto> operationLogs);
 
     /**
      * 删除-按时间

@@ -116,7 +116,8 @@ public class OperationLogAspect {
             entity.setLogInfo(info);
             entity.setInterfaceName(clazz.getName());
             entity.setServerIp(this.request.getLocalAddr());
-            entity.setClientIp(StringUtils.split(this.request.getHeader("X-Forwarded-For"))[0]);
+            String xForwardedFor = this.request.getHeader("X-Forwarded-For");
+            entity.setClientIp(StringUtils.isBlank(xForwardedFor) ? xForwardedFor : StringUtils.split(this.request.getHeader("X-Forwarded-For"))[0]);
             entity.setClientCode(this.request.getHeader("User-Agent"));
             entity.setUri(this.request.getRequestURI());
             entity.setUrl(this.request.getRequestURL().toString());
