@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.panshicloud.base.dao.entity.QueryIndexTemp;
 import com.panshicloud.base.dao.mapper.QueryIndexTempMapper;
 import com.panshicloud.base.remote.service.IQueryIndexTempService;
+import com.panshicloud.base.service.constants.RedisKeyCst;
 import com.panshicloud.base.service.util.Md5Util;
+import com.panshicloud.common.lock.SupplierLock;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.apache.ibatis.session.ExecutorType;
@@ -31,29 +33,39 @@ public class QueryIndexTempServiceProvider extends ServiceImpl<QueryIndexTempMap
     private SqlSessionFactory sqlSessionFactory;
     @Autowired
     private QueryIndexTempMapper queryIndexTempMapper;
+    @Autowired
+    private SupplierLock supplierLock;
 
     @Override
     public void insertBatch(List<String> queryIdList, String md5) {
         // 批量操作
         SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH, false);
         QueryIndexTempMapper organizationIndexTempMapper = sqlSession.getMapper(QueryIndexTempMapper.class);
-        // 循环
-        int count = 0;
-        int batch = 10000;
-        for (String queryId : queryIdList) {
-            organizationIndexTempMapper.insert(queryId, md5);
-            count++;
-            if (count % batch == 0) {
+        try {
+            // 循环
+            int count = 0;
+            int batch = 10000;
+            for (String queryId : queryIdList) {
+                organizationIndexTempMapper.insert(queryId, md5);
+                count++;
+                if (count % batch == 0) {
+                    // 提交
+                    sqlSession.flushStatements();
+                    sqlSession.commit();
+                    sqlSession.clearCache();
+                    count = 0;
+                }
+            }
+            if (count > 0) {
                 // 提交
+                sqlSession.flushStatements();
                 sqlSession.commit();
                 sqlSession.clearCache();
-                count = 0;
             }
-        }
-        if (count > 0) {
-            // 提交
-            sqlSession.commit();
-            sqlSession.clearCache();
+        } catch (Exception e) {
+            sqlSession.rollback();
+        } finally {
+            sqlSession.close();
         }
     }
 
@@ -64,7 +76,13 @@ public class QueryIndexTempServiceProvider extends ServiceImpl<QueryIndexTempMap
         Integer countByMd5 = getCountByMd5(md5);
         log.info("获取统计数花费时间，花费时间：{}ms", System.currentTimeMillis() - s);
         if (countByMd5 == 0) {
-            insertBatch(queryIdList, md5);
+            // 更新表数据，先删除，后新增
+            supplierLock.exec(md5,
+                    () -> true,
+                    () -> {
+                        insertBatch(queryIdList, md5);
+                    }
+            );
             log.info("临时表塞数据花费时间，花费时间：{}ms", System.currentTimeMillis() - s);
         }
         return md5;
