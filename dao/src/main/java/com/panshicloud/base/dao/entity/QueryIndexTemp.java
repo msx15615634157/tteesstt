@@ -30,6 +30,10 @@ public class QueryIndexTemp {
     private String queryId;
 
     /**
+     * 排序
+     */
+    private Integer sort;
+    /**
      * md5
      */
     private String md5;

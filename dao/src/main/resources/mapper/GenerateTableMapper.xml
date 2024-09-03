@@ -268,6 +268,13 @@
           AND table_schema = '${tableSpace}'
     </select>
 
+
+    <select id="findTableIndex" resultType="com.panshicloud.base.dao.dos.TableIndexDo" databaseId="oracle">
+        SELECT table_name,index_name
+        FROM all_indexes
+        WHERE table_owner = '${tableSpace}'
+    </select>
+
     <sql id="fieldInfo" databaseId="oracle">
         ${field.name}
         <choose>

@@ -40,10 +40,6 @@
             <artifactId>operationlog</artifactId>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>com.panshicloud.base</groupId>
-            <artifactId>operationlog</artifactId>
-        </dependency>
     </dependencies>
 
     <build>

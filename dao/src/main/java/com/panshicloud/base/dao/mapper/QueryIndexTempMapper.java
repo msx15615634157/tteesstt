@@ -18,15 +18,9 @@ public interface QueryIndexTempMapper extends BaseMapper<QueryIndexTemp> {
      * 新增
      * @param queryId 查询id
      * @param md5
+     * @param sort
      */
-    void insert(@Param("queryId") String queryId, @Param("md5") String md5);
-
-    /**
-     * 批量插入
-     * @param queryIdList 查询id集合
-     * @param md5 MD5
-     */
-    void insertBatch(@Param("queryIdList") List<String> queryIdList, @Param("md5") String md5);
+    void insert(@Param("queryId") String queryId, @Param("md5") String md5,@Param("sort") String sort);
 
     /**
      * 清空表

@@ -3,6 +3,7 @@ package com.panshicloud.base.dao.mapper;
 import com.panshicloud.base.dao.dos.FieldCommentDo;
 import com.panshicloud.base.dao.dos.FieldTypeDo;
 import com.panshicloud.base.dao.dos.GenerateTableFieldDo;
+import com.panshicloud.base.dao.dos.TableIndexDo;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
@@ -203,4 +204,10 @@ public interface GenerateTableMapper {
      * @return
      */
     List<FieldTypeDo> getTypes(@Param("tableName") String tableName, @Param("tableSpace") String tableSpace);
+
+    /**
+     * 获取所有表字段类型
+     *
+     */
+    List<TableIndexDo> findTableIndex(@Param("tableSpace") String tableSpace);
 }

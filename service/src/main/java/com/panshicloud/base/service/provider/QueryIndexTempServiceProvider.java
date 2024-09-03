@@ -14,6 +14,7 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,34 +40,47 @@ public class QueryIndexTempServiceProvider extends ServiceImpl<QueryIndexTempMap
     @Override
     public void insertBatch(List<String> queryIdList, String md5) {
         // 批量操作
-        SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH, false);
-        QueryIndexTempMapper organizationIndexTempMapper = sqlSession.getMapper(QueryIndexTempMapper.class);
-        try {
-            // 循环
-            int count = 0;
-            int batch = 10000;
-            for (String queryId : queryIdList) {
-                organizationIndexTempMapper.insert(queryId, md5);
-                count++;
-                if (count % batch == 0) {
-                    // 提交
-                    sqlSession.flushStatements();
-                    sqlSession.commit();
-                    sqlSession.clearCache();
-                    count = 0;
-                }
-            }
-            if (count > 0) {
-                // 提交
-                sqlSession.flushStatements();
-                sqlSession.commit();
-                sqlSession.clearCache();
-            }
-        } catch (Exception e) {
-            sqlSession.rollback();
-        } finally {
-            sqlSession.close();
+        List<QueryIndexTemp> batch = new ArrayList<>();
+        int i = 1;
+        for (String queryId : queryIdList) {
+            QueryIndexTemp queryIndexTemp = new QueryIndexTemp();
+            queryIndexTemp.setQueryId(queryId);
+            queryIndexTemp.setMd5(md5);
+            queryIndexTemp.setSort(i);
+            batch.add(queryIndexTemp);
+            i++;
         }
+        saveBatch(batch);
+//        // 批量操作
+//        SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH, false);
+//        QueryIndexTempMapper organizationIndexTempMapper = sqlSession.getMapper(QueryIndexTempMapper.class);
+//        try {
+//            // 循环
+//            int count = 0;
+//            int batch = 10000;
+//            for (String queryId : queryIdList) {
+//                organizationIndexTempMapper.insert(queryId, md5);
+//                count++;
+//                if (count % batch == 0) {
+//                    // 提交
+//                    sqlSession.flushStatements();
+//                    sqlSession.commit();
+//                    sqlSession.clearCache();
+//                    count = 0;
+//                }
+//            }
+//            if (count > 0) {
+//                // 提交
+//                sqlSession.flushStatements();
+//                sqlSession.commit();
+//                sqlSession.clearCache();
+//            }
+//        } catch (Exception e) {
+//            sqlSession.rollback();
+//        } finally {
+//            sqlSession.close();
+//        }
+
     }
 
     @Override

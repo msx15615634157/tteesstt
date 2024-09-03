@@ -1,5 +1,6 @@
 package com.panshicloud.base.remote.service;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**

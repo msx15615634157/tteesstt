@@ -2,10 +2,12 @@ package com.panshicloud.base.service.provider;
 
 import com.panshicloud.base.dao.dos.FieldTypeDo;
 import com.panshicloud.base.dao.dos.GenerateTableFieldDo;
+import com.panshicloud.base.dao.dos.TableIndexDo;
 import com.panshicloud.base.dao.mapper.GenerateTableMapper;
 import com.panshicloud.base.remote.constants.CommonCst;
 import com.panshicloud.base.remote.dto.FieldDto;
 import com.panshicloud.base.remote.dto.GenerateTableFieldDto;
+import com.panshicloud.base.remote.dto.TableIndexDto;
 import com.panshicloud.base.remote.dto.TableStructureDto;
 import com.panshicloud.base.remote.service.IGenerateTableService;
 import com.panshicloud.common.constants.JpCommonCst;
@@ -209,6 +211,12 @@ public class GenerateTableServiceProvider implements IGenerateTableService {
             default:
                 throw ExceptionHelper.newException(JpErrorCodeCst.SYSTEM_ERROR, "不支持的字段类型");
         }
+    }
+
+    @Override
+    public List<TableIndexDto> findTableIndex() {
+        List<TableIndexDo> tableIndex = generateDataTableMapper.findTableIndex(tableSpace);
+        return ConvertHelper.tToV(tableIndex, TableIndexDto.class);
     }
 
 }

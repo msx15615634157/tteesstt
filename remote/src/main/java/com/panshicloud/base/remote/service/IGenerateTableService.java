@@ -2,6 +2,7 @@ package com.panshicloud.base.remote.service;
 
 import com.panshicloud.base.remote.dto.FieldDto;
 import com.panshicloud.base.remote.dto.GenerateTableFieldDto;
+import com.panshicloud.base.remote.dto.TableIndexDto;
 import com.panshicloud.base.remote.dto.TableStructureDto;
 
 import java.util.List;
@@ -177,4 +178,6 @@ public interface IGenerateTableService {
      */
     Integer getFieldType(String tableName,String fieldName);
 
+
+    List<TableIndexDto> findTableIndex();
 }
