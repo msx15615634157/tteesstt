@@ -25,6 +25,7 @@
         <module>view</module>
         <module>operationlog</module>
         <module>parameter</module>
+        <module>timed</module>
     </modules>
 
     <properties>
