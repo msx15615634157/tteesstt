@@ -103,7 +103,7 @@ public class TimedTaskCst {
     public static final String DATE_FORMAT_YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd hh:mm:ss";
 
     /**
-     * 时间格式yyyyMMddHHmmss
+     * 时间格式yyyyMMddHHmmssSSS
      */
     public static final String DATE_FORMAT_YYYYMMDDHHMMSSSSS = "yyyyMMddHHmmssSSS";
 

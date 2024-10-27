@@ -45,10 +45,10 @@ public class MybatisPlusMetaObjectHandler implements MetaObjectHandler {
         if (meta.hasSetter("updateUserId")) {
             setFieldValByName("updateUserId", this.getUserId(), meta);
         }
-        if (meta.hasSetter("operationUserId")) {
+        if (meta.hasSetter("operationUserId") && meta.getValue("operationUserId") == null) {
             setFieldValByName("operationUserId", this.getUserId(), meta);
         }
-        if (meta.hasSetter("operationOrganizationId")) {
+        if (meta.hasSetter("operationOrganizationId") && meta.getValue("operationOrganizationId") == null) {
             setFieldValByName("operationOrganizationId", getOrganizationId(), meta);
         }
     }

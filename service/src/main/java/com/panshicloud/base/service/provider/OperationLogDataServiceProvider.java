@@ -10,11 +10,11 @@ import com.panshicloud.base.remote.dto.LogDto;
 import com.panshicloud.base.remote.dto.OperationLogDto;
 import com.panshicloud.base.remote.service.IOperationLogDataService;
 import com.panshicloud.common.base.PageDto;
-import com.panshicloud.common.export.excel.ExcelExportUtils;
-import com.panshicloud.common.export.excel.entity.Col;
-import com.panshicloud.common.export.excel.entity.Excel;
-import com.panshicloud.common.export.excel.entity.Row;
-import com.panshicloud.common.export.excel.entity.Sheet;
+import com.export.excel.ExcelExportUtils;
+import com.export.excel.entity.Col;
+import com.export.excel.entity.Excel;
+import com.export.excel.entity.Row;
+import com.export.excel.entity.Sheet;
 import com.panshicloud.common.helper.ConvertHelper;
 import com.panshicloud.common.utils.StringUtils;
 import org.apache.dubbo.config.annotation.DubboService;
@@ -54,11 +54,25 @@ public class OperationLogDataServiceProvider extends ServiceImpl<OperationLogMap
     }
 
     @Override
+    public void deleteByData(Date startTime, Date endTime) {
+        lambdaUpdate()
+                .ge(OperationLog::getOperationTime, startTime)
+                .le(OperationLog::getOperationTime, endTime)
+                .remove();
+    }
+
+    @Override
     public PageDto<LogDto> findPage(Integer pageNumber, Integer pageSize, Date startTime, Date endTime, String type, String operation, String operationUserId) {
         IPage<OperationLog> page = new Page(pageNumber, pageSize);
         LambdaQueryWrapper<OperationLog> queryWrapper = getQueryWapper(startTime, endTime, type, operation, operationUserId);
         page = operationLogMapper.selectPage(page, queryWrapper);
         return new PageDto<>(page, LogDto.class);
+    }
+
+    @Override
+    public List<LogDto> find(Date startTime, Date endTime, String type, String operation, String operationUserId) {
+        LambdaQueryWrapper<OperationLog> queryWrapper = getQueryWapper(startTime, endTime, type, operation, operationUserId);
+        return ConvertHelper.tToV(operationLogMapper.selectList(queryWrapper), LogDto.class);
     }
 
     @Override

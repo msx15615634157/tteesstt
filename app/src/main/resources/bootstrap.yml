@@ -7,7 +7,7 @@ spring:
   application:
     name: base
   profiles:
-    active: test
+    active: r
   cloud:
     nacos:
       discovery:

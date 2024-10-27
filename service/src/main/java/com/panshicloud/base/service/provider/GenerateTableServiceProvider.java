@@ -158,8 +158,8 @@ public class GenerateTableServiceProvider implements IGenerateTableService {
     }
 
     @Override
-    public List<FieldDto> findFieldAndComments(String tableName) {
-        return ConvertHelper.tToV(generateDataTableMapper.findFieldAndComments(tableName, tableSpace), FieldDto.class);
+    public List<FieldDto> findFieldAndComments(String tableName, String dataSource) {
+        return ConvertHelper.tToV(generateDataTableMapper.findFieldAndComments(tableName, dataSource), FieldDto.class);
     }
 
     @Override

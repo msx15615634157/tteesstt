@@ -207,7 +207,6 @@ public interface GenerateTableMapper {
 
     /**
      * 获取所有表字段类型
-     *
      */
     List<TableIndexDo> findTableIndex(@Param("tableSpace") String tableSpace);
 }

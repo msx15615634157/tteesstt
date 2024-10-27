@@ -139,10 +139,11 @@ public interface IGenerateTableService {
     /**
      * 查指定表的表字段以及表字段注释
      *
-     * @param tableName 表名
-     * @return
+     * @param tableName  表名
+     * @param dataSource 数据源
+     * @return 结果集
      */
-    List<FieldDto> findFieldAndComments(String tableName);
+    List<FieldDto> findFieldAndComments(String tableName, String dataSource);
 
     /**
      * 查指定表的建表语句
@@ -165,7 +166,7 @@ public interface IGenerateTableService {
      * 更新字段（目前支持字段类型，字段长度）
      *
      * @param tableName 表名
-     * @param field 字段
+     * @param field     字段
      */
     void updateField(String tableName, GenerateTableFieldDto field);
 
@@ -176,7 +177,7 @@ public interface IGenerateTableService {
      * @param fieldName 字段名称
      * @return Integer
      */
-    Integer getFieldType(String tableName,String fieldName);
+    Integer getFieldType(String tableName, String fieldName);
 
 
     List<TableIndexDto> findTableIndex();

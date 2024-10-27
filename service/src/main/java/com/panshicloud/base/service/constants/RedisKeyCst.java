@@ -24,6 +24,11 @@ public class RedisKeyCst {
     /**
      *
      */
-    public static final String OPERATION_LOG_QUEUE = "operation:log:queue";
+    public static final String OPERATION_LOG_QUEUE = "base:operation:log:queue";
+
+    /**
+     * 目录
+     */
+    public static final String DIR_TREE = "base:dir:tree:";
 
 }

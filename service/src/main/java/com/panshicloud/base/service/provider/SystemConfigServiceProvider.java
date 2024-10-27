@@ -8,7 +8,6 @@ import com.panshicloud.base.parameter.AbstractGroup;
 import com.panshicloud.base.parameter.AbstractParameter;
 import com.panshicloud.base.parameter.AbstractTab;
 import com.panshicloud.base.remote.dto.*;
-import com.panshicloud.base.remote.service.IParameterService;
 import com.panshicloud.base.remote.service.ISystemConfigService;
 import com.panshicloud.base.service.constants.CommonCst;
 import com.panshicloud.base.service.constants.ErrorCodeCst;

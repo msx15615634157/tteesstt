@@ -36,6 +36,14 @@ public interface IOperationLogDataService {
     void deleteByData(Data data);
 
     /**
+     * 删除-按时间区间
+     *
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     */
+    void deleteByData(Date startTime, Date endTime);
+
+    /**
      * 查询所有操作日志--分页
      *
      * @param pageNumber
@@ -48,6 +56,18 @@ public interface IOperationLogDataService {
      * @return
      */
     PageDto<LogDto> findPage(Integer pageNumber, Integer pageSize, Date startTime, Date endTime, String type, String operation, String operationUserId);
+
+    /**
+     * 查询所有操作日志--不分页
+     *
+     * @param startTime       开始时间
+     * @param endTime         结束时间
+     * @param type            类型/模块
+     * @param operation       功能
+     * @param operationUserId 操作用户id
+     * @return
+     */
+    List<LogDto> find(Date startTime, Date endTime, String type, String operation, String operationUserId);
 
     /**
      * 归档导出

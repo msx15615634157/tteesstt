@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author 86176
@@ -36,8 +35,7 @@ public class OperationLogCustomer implements CommandLineRunner {
     @Async
     public void run(String... args) {
         while (true) {
-            // redis 弹出数据的时候改为阻塞
-            OperationLogDto log = (OperationLogDto) redisTemplate.opsForList().rightPop(RedisKeyCst.OPERATION_LOG_QUEUE, 90, TimeUnit.SECONDS);
+            OperationLogDto log = (OperationLogDto) redisTemplate.boundListOps(RedisKeyCst.OPERATION_LOG_QUEUE).rightPop();
             if (log != null) {
                 logs.add(log);
             }
