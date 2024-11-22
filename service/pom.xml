@@ -35,7 +35,7 @@
             <artifactId>web-tools</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.export</groupId>
+            <groupId>io.github.ke-xue-guai</groupId>
             <artifactId>excel</artifactId>
         </dependency>
         <dependency>
