@@ -9,6 +9,7 @@ import lombok.Data;
  */
 @Data
 public class DirUpdateDto {
+
     /**
      * 目录编码
      */
@@ -22,15 +23,6 @@ public class DirUpdateDto {
     /**
      * 目录类型
      */
-    private String type;
+    private Integer type;
 
-    /**
-     * 上级编码
-     */
-    private String parentCode;
-
-    /**
-     * 排序
-     */
-    private Integer sort;
 }

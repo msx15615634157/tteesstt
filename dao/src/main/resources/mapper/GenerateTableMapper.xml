@@ -124,8 +124,8 @@
     </select>
 
     <select id="findFieldAndComments" resultType="com.panshicloud.base.dao.dos.FieldCommentDo" databaseId="gauss">
-        SELECT c.column_name AS field,
-               d.description AS comments
+        SELECT upper(c.column_name) AS field,
+               d.description        AS comments
         FROM information_schema.columns c
                  LEFT JOIN
              pg_description d
@@ -426,6 +426,12 @@
         SELECT table_name, index_name
         FROM all_indexes
         WHERE table_owner = '${tableSpace}'
+    </select>
+
+    <select id="findTableIndex" resultType="com.panshicloud.base.dao.dos.TableIndexDo" databaseId="gauss">
+        select upper(tablename) as tablename, upper(indexname) as indexname
+        from pg_indexes
+        where schemaname = LOWER('${tableSpace}')
     </select>
 
     <sql id="fieldInfo" databaseId="oracle">

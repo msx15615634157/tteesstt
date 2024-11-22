@@ -31,6 +31,14 @@
             <artifactId>common</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.panshicloud</groupId>
+            <artifactId>web-tools</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.export</groupId>
+            <artifactId>excel</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.panshicloud.base</groupId>
             <artifactId>config</artifactId>
         </dependency>

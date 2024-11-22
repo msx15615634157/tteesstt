@@ -30,9 +30,9 @@ public class Dir implements Serializable {
     private String name;
 
     /**
-     * 目录类型
+     * 目录类型，0-指标集目录，1-报表目录
      */
-    private String type;
+    private Integer type;
 
     /**
      * 上级编码

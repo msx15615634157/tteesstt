@@ -19,6 +19,6 @@ public class DirTypeRequestVo {
 
     @ApiModelProperty(value = "目录类型", required = true)
     @NotNull(message = "目录类型不能为空")
-    private String type;
+    private Integer type;
 
 }

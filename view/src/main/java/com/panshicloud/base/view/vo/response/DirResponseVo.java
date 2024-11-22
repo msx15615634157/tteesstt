@@ -26,7 +26,7 @@ public class DirResponseVo implements Serializable {
     private String name;
 
     @ApiModelProperty("目录类型")
-    private String type;
+    private Integer type;
 
     @ApiModelProperty("上级编码")
     private String parentCode;

@@ -9,6 +9,7 @@ import com.panshicloud.base.remote.service.IAppService;
 import com.panshicloud.base.remote.service.IMenuParameterService;
 import com.panshicloud.base.remote.service.IMenuService;
 import com.panshicloud.base.view.vo.request.*;
+import com.panshicloud.base.view.vo.response.MenuAndAppResponseVo;
 import com.panshicloud.base.view.vo.response.MenuEnablePermissionResponseVo;
 import com.panshicloud.base.view.vo.response.MenuParameterResponseVo;
 import com.panshicloud.base.view.vo.response.MenuResponseVo;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -50,6 +52,20 @@ public class MenuController {
     @PostMapping("/findByAppId")
     public GenericResponseVo<List<MenuResponseVo>> findByAppId(@RequestBody @Validated MenuFindRequestVo vo) {
         return new GenericResponseVo<>(ConvertHelper.tToV(menuService.findByAppId(vo.getAppId()), MenuResponseVo.class));
+    }
+
+    @ApiOperation("通过全部应用查询菜单")
+    @PostMapping("/findByAllAppId")
+    public GenericResponseVo<List<MenuAndAppResponseVo>> findByAllAppId() {
+        List<AppDto> appList = appService.findAll();
+        List<MenuAndAppResponseVo> rst = new ArrayList<>();
+        for (AppDto app : appList) {
+            MenuAndAppResponseVo menuAndAppResponseVo = ConvertHelper.tToV(app, MenuAndAppResponseVo.class);
+            List<MenuResponseVo> menuResponseVos = ConvertHelper.tToV(menuService.findByAppId(app.getId()), MenuResponseVo.class);
+            menuAndAppResponseVo.setMenuList(menuResponseVos);
+            rst.add(menuAndAppResponseVo);
+        }
+        return new GenericResponseVo<>(rst);
     }
 
     @ApiOperation("通过所属应用查询菜单")

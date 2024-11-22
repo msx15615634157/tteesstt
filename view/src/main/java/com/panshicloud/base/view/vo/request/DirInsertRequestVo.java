@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author gxk
@@ -15,10 +16,10 @@ import javax.validation.constraints.NotEmpty;
 @ApiModel
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class DirInsertOrUpdateRequestVo {
+public class DirInsertRequestVo {
 
     @ApiModelProperty(value = "编码", required = true)
-    @NotEmpty(message = "id不能为空")
+    @NotEmpty(message = "编码不能为空")
     private String code;
 
     @ApiModelProperty(value = "名称", required = true)
@@ -26,13 +27,10 @@ public class DirInsertOrUpdateRequestVo {
     private String name;
 
     @ApiModelProperty(value = "类型", required = true)
-    @NotEmpty(message = "类型不能为空")
-    private String type;
+    @NotNull(message = "类型不能为空")
+    private Integer type;
 
     @ApiModelProperty(value = "父级编码", required = true)
     private String parentCode;
-
-    @ApiModelProperty(value = "排序", required = true)
-    private Integer sort;
 
 }

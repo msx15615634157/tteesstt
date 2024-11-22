@@ -16,43 +16,68 @@ public interface IDirService {
 
     /**
      * 新增目录
+     *
      * @param dir 目录数据
      */
     void insert(DirInsertDto dir);
 
     /**
      * 修改目录
+     *
      * @param dir 目录数据
      */
     void update(DirUpdateDto dir);
 
     /**
+     * 更新排序
+     *
+     * @param code       编码
+     * @param parentCode 父级编码
+     * @param sort       排序字段
+     * @param type       目录类型
+     */
+    void updateSort(Integer type, String code, String parentCode, Integer sort);
+
+    /**
      * 删除指定目录，会删除关联下级
+     *
      * @param type 目录类型
      * @param code 目录编码
      */
-    void delete(String type, String code);
+    void delete(Integer type, String code);
 
     /**
      * 获取目录
+     *
      * @param type 目录类型
      * @param code 目录编码
      * @return 目录数据
      */
-    DirDto get(String type, String code);
+    DirDto get(Integer type, String code);
 
     /**
      * 获取目录
+     *
      * @param type 目录类型
      * @return 目录数据
      */
-    List<DirDto> find(String type);
+    List<DirDto> find(Integer type);
 
     /**
      * 获取目录树
+     *
      * @param type 目录类型
      * @return 目录树
      */
-    List<DirTreeDto> findToTree(String type);
+    List<DirTreeDto> findToTree(Integer type);
+
+    /**
+     * 按照类型查询全部下级目录（包含自己）
+     *
+     * @param type    类型
+     * @param dirCode 目录编码
+     * @return 结果集
+     */
+    List<DirDto> findAllChildrenAndSelf(Integer type, String dirCode);
 
 }

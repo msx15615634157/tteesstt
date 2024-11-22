@@ -26,7 +26,7 @@ public class DirDto implements Serializable {
     /**
      * 目录类型
      */
-    private String type;
+    private Integer type;
 
     /**
      * 上级编码
