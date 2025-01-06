@@ -1,5 +1,6 @@
 package com.panshicloud.base.service.provider;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.panshicloud.base.dao.entity.MenuParameter;
@@ -57,7 +58,7 @@ public class MenuParameterServiceProvider extends ServiceImpl<MenuParameterMappe
         return rst;
     }
 
-    @Override
+/*    @Override
     public List<MenuEnablePermissionDto> findEnablePermissions(List<MenuDto> menus) {
         List<MenuEnablePermissionDto> rst = new ArrayList<>();
         // 获取菜单id集合
@@ -92,6 +93,64 @@ public class MenuParameterServiceProvider extends ServiceImpl<MenuParameterMappe
                         parameter.setValue(btnParameters);
                         menuParameterResults.add(parameter);
                     }
+                }
+            }
+            if (menuParameterResults.size() != 0) {
+                menuEnablePermission.setMenuParameters(menuParameterResults);
+                rst.add(menuEnablePermission);
+            }
+        }
+        return rst;
+    }*/
+
+    @Override
+    public List<MenuEnablePermissionDto> findEnablePermissions(List<MenuDto> menus) {
+        List<MenuEnablePermissionDto> rst = new ArrayList<>();
+        // 获取菜单id集合
+        List<String> menuIds = menus.stream().map(MenuDto::getId).collect(Collectors.toList());
+        // 获取全部的菜单参数
+        List<MenuParameter> allMenuParameter = lambdaQuery().in(MenuParameter::getMenuId, menuIds).list();
+        // 按菜单id分组
+        Map<String, List<MenuParameter>> groupMenu = allMenuParameter.stream().sorted(Comparator.comparing(MenuParameter::getMenuId)).collect(Collectors.groupingBy(MenuParameter::getMenuId));
+        for (String menuId : groupMenu.keySet()) {
+            Optional<MenuDto> optional = menus.stream().filter(it -> it.getId().equals(menuId)).findAny();
+            if (!optional.isPresent()) {
+                continue;
+            }
+            MenuEnablePermissionDto menuEnablePermission = ConvertHelper.tToV(optional.get(), MenuEnablePermissionDto.class);
+            List<MenuParameterDto> menuParameterResults = new ArrayList<>();
+            List<MenuParameter> menuParameters = groupMenu.get(menuId);
+            menuParameters = menuParameters.stream().filter(item -> "reportBtns".equals(item.getCode()) || "detailBtns".equals(item.getCode()) || "reportContextMenu".equals(item.getCode())).collect(Collectors.toList());
+            for (MenuParameter menuParameter : menuParameters) {
+                List<String> parameterValues = JSON.parseArray(menuParameter.getValue(), String.class);
+                if (parameterValues.size() != 2) {
+                    continue;
+                }
+                String valueJson = parameterValues.get(1);
+                if (StringUtils.isBlank(valueJson)) {
+                    continue;
+                }
+                MenuParameterDto parameter = new MenuParameterDto();
+                parameter.setCode(menuParameter.getCode());
+                // 转换为原来的格式
+                parameter.setValue(StringUtils.isBlank(menuParameter.getValue()) ? "" : StringUtils.toObject(menuParameter.getValue()));
+
+                List<BtnParameterDto> btnParameterList = null;
+                try {
+                    btnParameterList = JSONObject.parseArray((String) parameter.getValue(), BtnParameterDto.class);
+                } catch (Exception e) {
+                    log.error("JSON字符串转集合失败：" + parameter.getValue());
+                    continue;
+                }
+                List<BtnParameterDto> btnParameters = btnParameterList.stream().filter(it -> it.getIsPermission() != null && it.getIsPermission()).collect(Collectors.toList());
+                if (btnParameters.size() > 0) {
+                    parameter.setIsTab("true");
+                    btnParameters = btnParameters.stream().filter(BtnParameterDto::getIsPermission).collect(Collectors.toList());
+                    parameter.setValue(btnParameters);
+                    menuParameterResults.add(parameter);
+                }
+                if (StringUtils.equals("\"\"", parameter.getValue())) {
+                    parameter.setValue("[]");
                 }
             }
             if (menuParameterResults.size() != 0) {

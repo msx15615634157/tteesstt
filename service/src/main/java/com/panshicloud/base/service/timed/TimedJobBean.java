@@ -62,6 +62,7 @@ public class TimedJobBean extends QuartzJobBean {
         paramsMap.put("operateUserName", operateUserName);
         paramsMap.put("params", params);
         paramsMap.put("user", user);
+        paramsMap.put("taskId", taskId);
         timedTaskRecordService.insert(operateUserName, TimedTaskCst.TIMED_TASK_EXECUTION_START_CONTENT, Boolean.TRUE, taskId, operationTimedCode);
         try {
             // 获取锁-判断当前任务是否正在执行，如果正在执行直接打印到日志中。

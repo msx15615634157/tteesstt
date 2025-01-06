@@ -176,8 +176,18 @@ public class TimedTaskManageServiceProvider extends ServiceImpl<TimedTaskMapper,
     }
 
     @Override
+    public void update(String id, String configParams) {
+        TimedTaskDto getTtimedTask = getById(id);
+        this.update(getTtimedTask.getCode(),getTtimedTask.getName(), getTtimedTask.getType(), getTtimedTask.getGroupType(), getTtimedTask.getStatus(), getTtimedTask.getOperateUserName(), getTtimedTask.getCornExpression(), getTtimedTask.getRemark(), getTtimedTask.getId(), configParams);
+    }
+
+    @Override
     public TimedTaskDto getById(String id) {
-        TimedTask timedTask = lambdaQuery().eq(TimedTask::getId, id).list().get(0);
+        List<TimedTask> list = lambdaQuery().eq(TimedTask::getId, id).list();
+        if (list.isEmpty()) {
+            return new TimedTaskDto();
+        }
+        TimedTask timedTask = list.get(0);
         return ConvertHelper.tToV(timedTask, TimedTaskDto.class);
     }
 

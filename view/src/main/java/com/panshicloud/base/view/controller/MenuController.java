@@ -9,10 +9,7 @@ import com.panshicloud.base.remote.service.IAppService;
 import com.panshicloud.base.remote.service.IMenuParameterService;
 import com.panshicloud.base.remote.service.IMenuService;
 import com.panshicloud.base.view.vo.request.*;
-import com.panshicloud.base.view.vo.response.MenuAndAppResponseVo;
-import com.panshicloud.base.view.vo.response.MenuEnablePermissionResponseVo;
-import com.panshicloud.base.view.vo.response.MenuParameterResponseVo;
-import com.panshicloud.base.view.vo.response.MenuResponseVo;
+import com.panshicloud.base.view.vo.response.*;
 import com.panshicloud.common.base.request.IdRequestVo;
 import com.panshicloud.common.base.response.GenericResponseVo;
 import com.panshicloud.common.base.response.SuccessResponseVo;
@@ -82,6 +79,13 @@ public class MenuController {
         return ResponseHelper.SUCCESS;
     }
 
+    @ApiOperation("复制菜单")
+    @PostMapping("/copy")
+    @OperationLog(type = "菜单-复制", operation = "复制菜单", value = "'菜单Id='+#vo.menuId")
+    public GenericResponseVo<String> copy(@RequestBody @Validated MenuCopyRequestVo vo) {
+        return new GenericResponseVo<>(menuService.copy(vo.getMenuId()));
+    }
+
     @ApiOperation("修改菜单")
     @PostMapping("/update")
     @OperationLog(type = "菜单-更新", operation = "修改菜单", value = "'应用Id='+#vo.appId+'菜单编码='+#vo.code+'菜单名称='+#vo.name+'菜单类型='+#vo.type+'父级菜单id='+#vo.parentId+'路由名称='+#vo.routerName+'菜单参数='+#vo.param")
@@ -128,12 +132,12 @@ public class MenuController {
         return new GenericResponseVo<>(ConvertHelper.tToV(menuParameterService.findByMenuId(vo.getId()), MenuParameterResponseVo.class));
     }
 
-//    暂不使用
-//    @ApiOperation("查询菜单参数")
-//    @PostMapping("/findEnablePermissions")
-//    public GenericResponseVo<List<MenuParameterResponseVo>> findEnablePermissions(@RequestBody @Validated IdRequestVo vo) {
-//        return new GenericResponseVo<>(ConvertHelper.tToV(menuParameterService.findEnablePermissions(vo.getId()), MenuParameterResponseVo.class));
-//    }
+    //    暂不使用
+    //    @ApiOperation("查询菜单参数")
+    //    @PostMapping("/findEnablePermissions")
+    //    public GenericResponseVo<List<MenuParameterResponseVo>> findEnablePermissions(@RequestBody @Validated IdRequestVo vo) {
+    //        return new GenericResponseVo<>(ConvertHelper.tToV(menuParameterService.findEnablePermissions(vo.getId()), MenuParameterResponseVo.class));
+    //    }
 
     @ApiOperation("根据菜单编码查询菜单参数")
     @PostMapping("/findParametersByCode")

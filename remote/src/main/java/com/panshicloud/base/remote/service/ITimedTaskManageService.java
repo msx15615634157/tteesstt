@@ -61,6 +61,14 @@ public interface ITimedTaskManageService {
     void update(String code, String name, String type,String groupType, String status, String operateUserName, String cornExpression, String remark, String id, String configParams);
 
     /**
+     * 修改参数
+     *
+     * @param id              主键ID
+     * @param configParams    参数
+     */
+    void update(String id, String configParams);
+
+    /**
      * 通过id查询
      *
      * @param id

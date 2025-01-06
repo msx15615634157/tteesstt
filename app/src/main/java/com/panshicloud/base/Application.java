@@ -17,10 +17,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * @Date: 2021/6/29 15:47
  * @Version: 1.0
  */
-@MapperScan({"com.panshicloud.base.dao.mapper"})
+@MapperScan({"com.panshicloud.base.dao.mapper","com.panshicloud.common.mapper"})
 @SpringBootApplication
 @EnableOperationLog
-@ComponentScan({"com.panshicloud.common.lock", "com.panshicloud.base","com.panshicloud.common.controller"})
+@ComponentScan({"com.panshicloud.common.lock", "com.panshicloud.base", "com.panshicloud.common"})
 @ServletComponentScan(basePackages = "com.panshicloud.common.filter")
 @EnableAsync
 @EnableScheduling

@@ -37,6 +37,14 @@ public interface IMenuParameterService {
      * @param menus 菜单集合
      * @return List<MenuEnablePermissionDto>
      */
+    //List<MenuEnablePermissionDto> findEnablePermissions(List<MenuDto> menus);
+
+    /**
+     * 获取开启权限的按钮（新）
+     *
+     * @param menus 菜单集合
+     * @return List<MenuEnablePermissionDto>
+     */
     List<MenuEnablePermissionDto> findEnablePermissions(List<MenuDto> menus);
 
     /**
