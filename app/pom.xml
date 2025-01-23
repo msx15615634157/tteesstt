@@ -42,10 +42,6 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.panshicloud</groupId>
-            <artifactId>upgrade-script</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
