@@ -5,10 +5,7 @@ import com.panshicloud.base.dao.dos.GenerateTableFieldDo;
 import com.panshicloud.base.dao.dos.TableIndexDo;
 import com.panshicloud.base.dao.mapper.GenerateTableMapper;
 import com.panshicloud.base.remote.constants.CommonCst;
-import com.panshicloud.base.remote.dto.FieldDto;
-import com.panshicloud.base.remote.dto.GenerateTableFieldDto;
-import com.panshicloud.base.remote.dto.TableIndexDto;
-import com.panshicloud.base.remote.dto.TableStructureDto;
+import com.panshicloud.base.remote.dto.*;
 import com.panshicloud.base.remote.service.IGenerateTableService;
 import com.panshicloud.common.constants.JpCommonCst;
 import com.panshicloud.common.constants.JpErrorCodeCst;
@@ -107,13 +104,23 @@ public class GenerateTableServiceProvider implements IGenerateTableService {
     }
 
     @Override
-    public void createIndex(String tableName, String indexName, String columnList, String indexType) {
+    public void createIndex(String tableName, String indexName, List<String> columnList, String indexType) {
         generateDataTableMapper.createIndex(tableName, indexName, columnList, indexType);
     }
 
     @Override
     public List<String> findIndex(String tableName) {
         return generateDataTableMapper.findIndex(tableName, tableSpace);
+    }
+
+    @Override
+    public List<IndexAndIndexFieldDto> findIndexAndIndexField(String tableName) {
+        return ConvertHelper.tToV(generateDataTableMapper.findIndexAndIndexField(tableName, tableSpace), IndexAndIndexFieldDto.class);
+    }
+
+    @Override
+    public List<IndexAndIndexFieldDto> findAllIndexAndIndexField() {
+        return ConvertHelper.tToV(generateDataTableMapper.findAllIndexAndIndexField(tableSpace), IndexAndIndexFieldDto.class);
     }
 
     @Override

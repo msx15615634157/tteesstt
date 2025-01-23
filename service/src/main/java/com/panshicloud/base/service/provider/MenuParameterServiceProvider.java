@@ -120,7 +120,7 @@ public class MenuParameterServiceProvider extends ServiceImpl<MenuParameterMappe
             MenuEnablePermissionDto menuEnablePermission = ConvertHelper.tToV(optional.get(), MenuEnablePermissionDto.class);
             List<MenuParameterDto> menuParameterResults = new ArrayList<>();
             List<MenuParameter> menuParameters = groupMenu.get(menuId);
-            menuParameters = menuParameters.stream().filter(item -> "reportBtns".equals(item.getCode()) || "detailBtns".equals(item.getCode()) || "reportContextMenu".equals(item.getCode())).collect(Collectors.toList());
+            menuParameters = menuParameters.stream().filter(item -> null != item.getValue() && item.getValue().contains("isPermission")).collect(Collectors.toList());
             for (MenuParameter menuParameter : menuParameters) {
                 List<String> parameterValues = JSON.parseArray(menuParameter.getValue(), String.class);
                 if (parameterValues.size() != 2) {

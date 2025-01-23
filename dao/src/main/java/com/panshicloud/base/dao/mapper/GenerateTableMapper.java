@@ -1,9 +1,6 @@
 package com.panshicloud.base.dao.mapper;
 
-import com.panshicloud.base.dao.dos.FieldCommentDo;
-import com.panshicloud.base.dao.dos.FieldTypeDo;
-import com.panshicloud.base.dao.dos.GenerateTableFieldDo;
-import com.panshicloud.base.dao.dos.TableIndexDo;
+import com.panshicloud.base.dao.dos.*;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
@@ -94,7 +91,7 @@ public interface GenerateTableMapper {
      * @param columnList 索引字段
      * @param indexType  索引类型  不填时-普通索引  1-唯一索引
      */
-    void createIndex(@Param("tableName") String tableName, @Param("indexName") String indexName, @Param("columnList") String columnList, @Param("indexType") String indexType);
+    void createIndex(@Param("tableName") String tableName, @Param("indexName") String indexName, @Param("columnList") List<String> columnList, @Param("indexType") String indexType);
 
     /**
      * 删除索引
@@ -111,6 +108,23 @@ public interface GenerateTableMapper {
      * @return 索引
      */
     List<String> findIndex(@Param("tableName") String tableName, @Param("tableSpace") String tableSpace);
+
+    /**
+     * 按表查询索引及其索引字段
+     *
+     * @param tableName  表名
+     * @param tableSpace 表空间
+     * @return 索引
+     */
+    List<IndexAndIndexFieldDo> findIndexAndIndexField(@Param("tableName") String tableName, @Param("tableSpace") String tableSpace);
+
+    /**
+     * 查询全部索引及其索引字段
+     *
+     * @param tableSpace 表空间
+     * @return 索引
+     */
+    List<IndexAndIndexFieldDo> findAllIndexAndIndexField(@Param("tableSpace") String tableSpace);
 
     /**
      * 新增字段

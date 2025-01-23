@@ -82,7 +82,11 @@
         <if test="indexType==1 and indexType!='' and indexType!=null">
             UNIQUE
         </if>
-        INDEX ${indexName} ON ${tableName}(${columnList})
+        INDEX ${indexName} ON ${tableName}(
+        <foreach collection="columnList" item="column" separator=",">
+            ${column}
+        </foreach>
+        )
     </select>
 
     <delete id="deleteIndex">
@@ -107,6 +111,42 @@
         from pg_indexes
         where tablename = LOWER('${tableName}')
           and schemaname = LOWER('${tableSpace}')
+    </select>
+
+    <select id="findIndexAndIndexField" resultType="com.panshicloud.base.dao.dos.IndexAndIndexFieldDo"
+            databaseId="oracle">
+        SELECT USER_INDEXES.INDEX_NAME,
+               USER_IND_COLUMNS.COLUMN_NAME     AS FIELD_NAME,
+               USER_IND_COLUMNS.COLUMN_POSITION AS SORT
+        FROM USER_INDEXES
+                 LEFT JOIN USER_IND_COLUMNS ON USER_INDEXES.INDEX_NAME = USER_IND_COLUMNS.INDEX_NAME
+        WHERE USER_INDEXES.TABLE_NAME = UPPER('${tableName}')
+    </select>
+
+    <select id="findIndexAndIndexField" resultType="com.panshicloud.base.dao.dos.IndexAndIndexFieldDo"
+            databaseId="gauss">
+        SELECT c.relname AS index_name,
+               t.relname AS table_name,
+               a.attname AS column_name
+        FROM pg_index i
+                 JOIN
+             pg_class c ON c.oid = i.indexrelid
+                 JOIN
+             pg_class t ON t.oid = i.indrelid
+                 JOIN
+             pg_attribute a ON a.attnum = ANY (i.indkey) AND a.attrelid = t.oid
+        WHERE t.relname = LOWER('${tableName}');
+    </select>
+
+    <select id="findAllIndexAndIndexField" resultType="com.panshicloud.base.dao.dos.IndexAndIndexFieldDo"
+            databaseId="oracle">
+        SELECT USER_INDEXES.TABLE_NAME,
+               USER_INDEXES.INDEX_NAME,
+               USER_IND_COLUMNS.COLUMN_NAME     AS FIELD_NAME,
+               USER_IND_COLUMNS.COLUMN_POSITION AS SORT
+        FROM USER_INDEXES
+                 LEFT JOIN USER_IND_COLUMNS ON USER_INDEXES.INDEX_NAME = USER_IND_COLUMNS.INDEX_NAME
+        WHERE USER_INDEXES.TABLESPACE_NAME = UPPER('${tableSpace}')
     </select>
 
     <select id="findFieldAndComments" resultType="com.panshicloud.base.dao.dos.FieldCommentDo" databaseId="oracle">

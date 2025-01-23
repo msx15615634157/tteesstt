@@ -2,18 +2,15 @@ package com.panshicloud.base.service.provider;
 
 import com.panshicloud.base.remote.dto.OperationLogDto;
 import com.panshicloud.base.remote.service.IOperationLogDataService;
-import com.panshicloud.base.service.constants.RedisKeyCst;
 import org.apache.dubbo.config.annotation.DubboReference;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * @author 86176
@@ -22,31 +19,30 @@ import java.util.List;
 @Component
 public class OperationLogCustomer implements CommandLineRunner {
 
-    @Autowired
-    private RedisTemplate redisTemplate;
     @DubboReference
     private IOperationLogDataService operationLogDataService;
-
-    private final List<OperationLogDto> logs = new ArrayList<>();
-
-    private final byte[] lock = new byte[0];
 
     @Override
     @Async
     public void run(String... args) {
         while (true) {
-            OperationLogDto log = (OperationLogDto) redisTemplate.boundListOps(RedisKeyCst.OPERATION_LOG_QUEUE).rightPop();
-            if (log != null) {
-                logs.add(log);
-            }
-            // 超过100，保存一次
-            if (logs.size() >= 100) {
-                synchronized (lock) {
-                    if (logs.size() >= 100) {
-                        operationLogDataService.insertBatch(logs);
-                        logs.clear();
+            // 超过3000，保存一次
+            if (OperationLogCache.COUNT.get() >= 3000) {
+                synchronized (OperationLogCache.class) {
+                    try {
+                        ConcurrentLinkedQueue<OperationLogDto> queue = OperationLogCache.find();
+                        operationLogDataService.insertBatch(new ArrayList<>(queue));
+                        OperationLogCache.clear();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        continue;
                     }
                 }
+            }
+            try {
+                Thread.sleep(2000);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
@@ -56,10 +52,11 @@ public class OperationLogCustomer implements CommandLineRunner {
      */
     @Scheduled(cron = "0 0 0/1 * * ?")
     public void truncateTmp() {
-        synchronized (lock) {
-            if (!logs.isEmpty()) {
-                operationLogDataService.insertBatch(logs);
-                logs.clear();
+        synchronized (OperationLogCache.class) {
+            ConcurrentLinkedQueue<OperationLogDto> queue = OperationLogCache.find();
+            if (!queue.isEmpty()) {
+                operationLogDataService.insertBatch(new ArrayList<>(queue));
+                OperationLogCache.clear();
             }
         }
     }

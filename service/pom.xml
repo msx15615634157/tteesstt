@@ -37,6 +37,7 @@
         <dependency>
             <groupId>io.github.ke-xue-guai</groupId>
             <artifactId>excel</artifactId>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.panshicloud.base</groupId>

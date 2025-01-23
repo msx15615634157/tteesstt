@@ -217,7 +217,7 @@ public class SystemConfigServiceProvider extends ServiceImpl<SystemConfigMapper,
                 // 获取一个参数
                 GenericService genericService;
                 try {
-                    genericService = systemConfigRemote.getGenericService(groupDto.getInterfaceName(), groupDto.getName());
+                    genericService = systemConfigRemote.getGenericService(groupDto.getInterfaceName(), groupDto.getCode());
                 } catch (Exception e) {
                     log.info("detailMessage:" + e.getMessage());
                     throw ExceptionHelper.newException(JpErrorCodeCst.SYSTEM_ERROR, groupDto.getName() + "服务未上线");
