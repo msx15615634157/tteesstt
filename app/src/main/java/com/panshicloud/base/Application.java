@@ -5,7 +5,10 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 
 /**
@@ -14,11 +17,14 @@ import org.springframework.scheduling.annotation.EnableAsync;
  * @Date: 2021/6/29 15:47
  * @Version: 1.0
  */
-@MapperScan({"com.panshicloud.base.dao.mapper"})
+@MapperScan({"com.panshicloud.base.dao.mapper","com.panshicloud.common.mapper"})
 @SpringBootApplication
 @EnableOperationLog
-@EnableAsync
+@ComponentScan({"com.panshicloud.common.lock", "com.panshicloud.base", "com.panshicloud.common"})
 @ServletComponentScan(basePackages = "com.panshicloud.common.filter")
+@EnableAsync
+@EnableScheduling
+@EnableCaching
 public class Application {
 
     public static void main(String[] args) {

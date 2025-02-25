@@ -4,7 +4,8 @@ import com.panshicloud.base.remote.dto.OperationLogDto;
 import com.panshicloud.base.remote.service.IOperationLogService;
 import com.panshicloud.common.context.CommonContext;
 import org.apache.dubbo.config.annotation.DubboService;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Date;
 
 /**
  * <p>
@@ -17,12 +18,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 @DubboService
 public class OperationLogServiceProvider implements IOperationLogService {
 
-    @Autowired
-    private OperationLogAsyncService operationLogAsyncService;
-
     @Override
     public void insert(OperationLogDto operationLogDto) {
         CommonContext.User user = CommonContext.getUser();
-        operationLogAsyncService.asyncInsert(operationLogDto, user);
+        operationLogDto.setOperationTime(new Date());
+        operationLogDto.setOperationUserId(user == null ? "NO LOGIN" : user.getId());
+        operationLogDto.setOperationOrganizationId(user == null ? "NO LOGIN" : user.getOrganizationId());
+        OperationLogCache.add(operationLogDto);
     }
 }

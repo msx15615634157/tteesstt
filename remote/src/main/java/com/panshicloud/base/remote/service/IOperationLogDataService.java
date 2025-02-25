@@ -7,24 +7,26 @@ import com.panshicloud.common.base.PageDto;
 import javax.xml.crypto.Data;
 import java.io.ByteArrayOutputStream;
 import java.util.Date;
+import java.util.List;
 
 /**
- * <p>
- * 操作日志服务
- * </p>
- *
- * @author huangrankun
+ * @author xingxingfa
+ * @since 2023/11/24
  */
-
 public interface IOperationLogDataService {
-
     /**
      * 新增
      *
      * @param operationLogDto 操作日志
-     * @return 是否成功
      */
-    boolean insert(OperationLogDto operationLogDto);
+    void insert(OperationLogDto operationLogDto);
+
+    /**
+     * 批量新增
+     *
+     * @param operationLogs
+     */
+    void insertBatch(List<OperationLogDto> operationLogs);
 
     /**
      * 删除-按时间
@@ -32,6 +34,14 @@ public interface IOperationLogDataService {
      * @param data
      */
     void deleteByData(Data data);
+
+    /**
+     * 删除-按时间区间
+     *
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     */
+    void deleteByData(Date startTime, Date endTime);
 
     /**
      * 查询所有操作日志--分页
@@ -46,6 +56,18 @@ public interface IOperationLogDataService {
      * @return
      */
     PageDto<LogDto> findPage(Integer pageNumber, Integer pageSize, Date startTime, Date endTime, String type, String operation, String operationUserId);
+
+    /**
+     * 查询所有操作日志--不分页
+     *
+     * @param startTime       开始时间
+     * @param endTime         结束时间
+     * @param type            类型/模块
+     * @param operation       功能
+     * @param operationUserId 操作用户id
+     * @return
+     */
+    List<LogDto> find(Date startTime, Date endTime, String type, String operation, String operationUserId);
 
     /**
      * 归档导出

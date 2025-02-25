@@ -24,4 +24,14 @@ public class ErrorCodeCst {
      */
     public static final String SYSTEM_CONFIG_IS_NOT_EXIST = "PSC-B-0201";
 
+    /**
+     * 目录数据不存在
+     */
+    public static final String DIR_IS_NOT_EXIST = "PSC-DIR-0001";
+
+    /**
+     * 目录数据已存在
+     */
+    public static final String DIR_IS_EXIST = "PSC-DIR-0001";
+
 }

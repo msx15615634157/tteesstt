@@ -8,10 +8,10 @@
 
     <update id="rename">
         rename
-        table
-        ${tableName}
-        to
-        ${toTableName}
+            table
+            ${tableName}
+                to
+                ${toTableName}
     </update>
 
     <select id="isExist" parameterType="String" resultType="Integer" databaseId="oracle">
@@ -24,6 +24,12 @@
         SELECT COUNT(*)
         FROM information_schema.TABLES
         WHERE table_name = '${tableName}'
+    </select>
+
+    <select id="isExist" parameterType="String" resultType="Integer" databaseId="gauss">
+        SELECT COUNT(*)
+        FROM pg_tables
+        WHERE tablename = LOWER('${tableName}')
     </select>
 
     <select id="isFieldExist" resultType="java.lang.Integer" databaseId="oracle">
@@ -42,6 +48,14 @@
           AND column_name = '${field}'
     </select>
 
+    <select id="isFieldExist" resultType="java.lang.Integer" databaseId="gauss">
+        SELECT COUNT(*)
+        from information_schema.columns
+        WHERE table_name = LOWER('${tableName}')
+          AND table_schema = LOWER('${tableSpace}')
+          AND column_name = LOWER('${field}')
+    </select>
+
     <select id="findField" resultType="java.util.List" databaseId="oracle">
         SELECT column_name
         from all_col_comments
@@ -56,12 +70,23 @@
           AND table_schema = '${tableSpace}'
     </select>
 
+    <select id="findField" resultType="java.util.List" databaseId="gauss">
+        SELECT column_name
+        from information_schema.columns
+        WHERE table_name = LOWER('${tableName}')
+          AND table_schema = LOWER('${tableSpace}')
+    </select>
+
     <select id="createIndex">
         CREATE
         <if test="indexType==1 and indexType!='' and indexType!=null">
             UNIQUE
         </if>
-        INDEX ${indexName} ON ${tableName}(${columnList})
+        INDEX ${indexName} ON ${tableName}(
+        <foreach collection="columnList" item="column" separator=",">
+            ${column}
+        </foreach>
+        )
     </select>
 
     <delete id="deleteIndex">
@@ -81,6 +106,49 @@
           and table_schema = '${tableSpace}'
     </select>
 
+    <select id="findIndex" resultType="java.lang.String" databaseId="gauss">
+        select indexname
+        from pg_indexes
+        where tablename = LOWER('${tableName}')
+          and schemaname = LOWER('${tableSpace}')
+    </select>
+
+    <select id="findIndexAndIndexField" resultType="com.panshicloud.base.dao.dos.IndexAndIndexFieldDo"
+            databaseId="oracle">
+        SELECT USER_INDEXES.INDEX_NAME,
+               USER_IND_COLUMNS.COLUMN_NAME     AS FIELD_NAME,
+               USER_IND_COLUMNS.COLUMN_POSITION AS SORT
+        FROM USER_INDEXES
+                 LEFT JOIN USER_IND_COLUMNS ON USER_INDEXES.INDEX_NAME = USER_IND_COLUMNS.INDEX_NAME
+        WHERE USER_INDEXES.TABLE_NAME = UPPER('${tableName}')
+    </select>
+
+    <select id="findIndexAndIndexField" resultType="com.panshicloud.base.dao.dos.IndexAndIndexFieldDo"
+            databaseId="gauss">
+        SELECT c.relname AS index_name,
+               t.relname AS table_name,
+               a.attname AS column_name
+        FROM pg_index i
+                 JOIN
+             pg_class c ON c.oid = i.indexrelid
+                 JOIN
+             pg_class t ON t.oid = i.indrelid
+                 JOIN
+             pg_attribute a ON a.attnum = ANY (i.indkey) AND a.attrelid = t.oid
+        WHERE t.relname = LOWER('${tableName}');
+    </select>
+
+    <select id="findAllIndexAndIndexField" resultType="com.panshicloud.base.dao.dos.IndexAndIndexFieldDo"
+            databaseId="oracle">
+        SELECT USER_INDEXES.TABLE_NAME,
+               USER_INDEXES.INDEX_NAME,
+               USER_IND_COLUMNS.COLUMN_NAME     AS FIELD_NAME,
+               USER_IND_COLUMNS.COLUMN_POSITION AS SORT
+        FROM USER_INDEXES
+                 LEFT JOIN USER_IND_COLUMNS ON USER_INDEXES.INDEX_NAME = USER_IND_COLUMNS.INDEX_NAME
+        WHERE USER_INDEXES.TABLESPACE_NAME = UPPER('${tableSpace}')
+    </select>
+
     <select id="findFieldAndComments" resultType="com.panshicloud.base.dao.dos.FieldCommentDo" databaseId="oracle">
         SELECT column_name as field, comments
         from all_col_comments
@@ -93,6 +161,20 @@
         from information_schema.columns
         WHERE table_name = '${tableName}'
           AND table_schema = '${tableSpace}'
+    </select>
+
+    <select id="findFieldAndComments" resultType="com.panshicloud.base.dao.dos.FieldCommentDo" databaseId="gauss">
+        SELECT upper(c.column_name) AS field,
+               d.description        AS comments
+        FROM information_schema.columns c
+                 LEFT JOIN
+             pg_description d
+             ON
+                 d.objoid = (c.table_schema || '.' || c.table_name)::regclass::oid
+    AND d.objsubid = c.ordinal_position
+        WHERE
+            c.table_name = LOWER('${tableName}')
+          AND c.table_schema = LOWER('${tableSpace}');
     </select>
 
     <select id="findTableStructure" resultType="java.lang.String">
@@ -110,6 +192,18 @@
         SELECT table_name, comments
         from information_schema.TABLES
         WHERE table_schema = '${tableSpace}'
+    </select>
+
+    <select id="findAllTable" resultType="java.util.Map" databaseId="gauss">
+        SELECT c.relname     AS table_name,
+               d.description AS comments
+        FROM pg_class c
+                 JOIN
+             pg_namespace n ON n.oid = c.relnamespace
+                 LEFT JOIN
+             pg_description d ON d.objoid = c.oid AND d.objsubid = 0
+        WHERE c.relkind = 'r'
+          AND n.nspname = LOWER('${tableSpace}');
     </select>
 
     <select id="isNullField" resultType="java.lang.Integer">
@@ -146,6 +240,20 @@
         )
     </update>
 
+    <update id="generate" databaseId="gauss">
+        CREATE TABLE ${tableName} (
+        <foreach collection="list" item="field">
+            <include refid="fieldInfo"/>
+            ,
+        </foreach>
+        <foreach collection="list" item="item">
+            <if test="item.isPrimaryKey == 1">
+                CONSTRAINT "${tableName}_${item.name}" PRIMARY KEY (${item.name})
+            </if>
+        </foreach>
+        )
+    </update>
+
     <update id="createTable">
         ${sql}
     </update>
@@ -170,18 +278,32 @@
         </foreach>
     </update>
 
+    <update id="batchInsertField" databaseId="gauss">
+        alter table ${tableName}
+        <foreach collection="list" item="field" separator=",">
+            add column
+            <include refid="fieldInfo"/>
+        </foreach>
+    </update>
+
     <update id="deleteField" databaseId="oracle">
         alter table ${tableName}
-        drop
+            drop
         (
-        ${fieldName}
+            ${fieldName}
         )
     </update>
 
     <update id="deleteField" databaseId="mysql">
         alter table ${tableName}
-        drop
-        ${fieldName}
+            drop
+                ${fieldName}
+    </update>
+
+    <update id="deleteField" databaseId="gauss">
+        alter table ${tableName}
+            drop column
+                ${fieldName}
     </update>
 
     <update id="batchDeleteField" databaseId="oracle">
@@ -196,6 +318,13 @@
         alter table ${tableName}
         <foreach collection="list" item="fieldName" separator=",">
             drop ${fieldName}
+        </foreach>
+    </update>
+
+    <update id="batchDeleteField" databaseId="gauss">
+        alter table ${tableName}
+        <foreach collection="list" item="fieldName" separator=",">
+            drop column ${fieldName}
         </foreach>
     </update>
 
@@ -218,6 +347,16 @@
         modify column
         <include refid="fieldInfo"/>
         comment '${field.comment}'
+    </update>
+
+    <update id="generateComment" databaseId="gauss">
+        comment
+        on column
+        ${tableName}
+        .
+        ${field.name}
+        is
+        '${field.comment}'
     </update>
 
     <update id="batchGenerateComment" databaseId="oracle">
@@ -243,6 +382,18 @@
         </foreach>
     </update>
 
+    <update id="batchGenerateComment" databaseId="gauss">
+        <foreach collection="fields" item="field">
+            comment
+            on column
+            ${tableName}
+            .
+            ${field.name}
+            is
+            '${field.comment}';
+        </foreach>
+    </update>
+
     <update id="updateField" databaseId="oracle">
         alter table ${tableName}
         modify (<include refid="fieldInfo"/>)
@@ -252,6 +403,41 @@
         alter table ${tableName}
         modify
         <include refid="fieldInfo"/>
+    </update>
+
+    <update id="updateField" databaseId="gauss">
+        alter table ${tableName}
+        alter column ${field.name} type
+        <choose>
+            <when test="field.type == 0">
+                varchar(${field.length})
+            </when>
+            <when test="field.type == 1">
+                numeric(11,0)
+            </when>
+            <when test="field.type == 2">
+                numeric(11,2)
+            </when>
+            <when test="field.type == 3">
+                date
+            </when>
+            <when test="field.type == 4">
+                date
+            </when>
+            <when test="field.type == 5">
+                clob
+            </when>
+        </choose>
+        <if test="field.isAllowNull != null">
+            ,
+            alter column
+            <if test="field.isAllowNull == 0">
+                set not null
+            </if>
+            <if test="field.isAllowNull == 1">
+                drop not null
+            </if>
+        </if>
     </update>
 
     <select id="getTypes" resultType="com.panshicloud.base.dao.dos.FieldTypeDo" databaseId="oracle">
@@ -266,6 +452,26 @@
         from information_schema.COLUMNS
         WHERE table_name = '${tableName}'
           AND table_schema = '${tableSpace}'
+    </select>
+
+    <select id="getTypes" resultType="com.panshicloud.base.dao.dos.FieldTypeDo" databaseId="gauss">
+        select column_name as fieldName, udt_name as type
+        from information_schema.columns
+        WHERE table_name = LOWER('${tableName}')
+          AND table_schema = LOWER('${tableSpace}')
+    </select>
+
+
+    <select id="findTableIndex" resultType="com.panshicloud.base.dao.dos.TableIndexDo" databaseId="oracle">
+        SELECT table_name, index_name
+        FROM all_indexes
+        WHERE table_owner = '${tableSpace}'
+    </select>
+
+    <select id="findTableIndex" resultType="com.panshicloud.base.dao.dos.TableIndexDo" databaseId="gauss">
+        select upper(tablename) as tablename, upper(indexname) as indexname
+        from pg_indexes
+        where schemaname = LOWER('${tableSpace}')
     </select>
 
     <sql id="fieldInfo" databaseId="oracle">
@@ -306,6 +512,33 @@
             </when>
             <when test="field.type == 2">
                 double(11,2)
+            </when>
+            <when test="field.type == 3">
+                date
+            </when>
+            <when test="field.type == 4">
+                date
+            </when>
+            <when test="field.type == 5">
+                clob
+            </when>
+        </choose>
+        <if test="field.isAllowNull == 0">
+            NOT NULL
+        </if>
+    </sql>
+
+    <sql id="fieldInfo" databaseId="gauss">
+        ${field.name}
+        <choose>
+            <when test="field.type == 0">
+                varchar(${field.length})
+            </when>
+            <when test="field.type == 1">
+                numeric(11,0)
+            </when>
+            <when test="field.type == 2">
+                numeric(11,2)
             </when>
             <when test="field.type == 3">
                 date

@@ -4,10 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.panshicloud.base.dao.entity.Menu;
 import com.panshicloud.base.dao.mapper.MenuMapper;
-import com.panshicloud.base.remote.dto.MenuDto;
-import com.panshicloud.base.remote.dto.MenuEnablePermissionDto;
-import com.panshicloud.base.remote.dto.MenuInsertDto;
-import com.panshicloud.base.remote.dto.MenuUpdateDto;
+import com.panshicloud.base.remote.dto.*;
 import com.panshicloud.base.remote.service.IMenuParameterService;
 import com.panshicloud.base.remote.service.IMenuService;
 import com.panshicloud.base.service.constants.ErrorCodeCst;
@@ -18,6 +15,7 @@ import com.panshicloud.common.utils.StringUtils;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -181,6 +179,42 @@ public class MenuServiceProvider extends ServiceImpl<MenuMapper, Menu> implement
         return ConvertHelper.tToV(lambdaQuery().eq(Menu::getAppId, appId).eq(Menu::getCode, code).one(), MenuDto.class);
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String copy(String menuId) {
+        // 获取菜单信息
+        MenuDto menuDto = get(menuId);
+        if (menuDto == null) {
+            throw new RuntimeException("未找到指定的菜单信息");
+        }
+        // 复制菜单代码
+        String copySuffix = generateCopySuffix(menuDto);
+        String newMenuCode = menuDto.getCode() + copySuffix;
+        String newMenuName = menuDto.getName() + copySuffix;
+        menuDto.setCode(newMenuCode);
+        menuDto.setName(newMenuName);
+        // 获取菜单参数列表
+        List<MenuParameterDto> menuParameterDtoList = menuParameterService.findByMenuId(menuId);
+        // 转换为插入对象
+        MenuInsertDto menuInsertDto = ConvertHelper.tToV(menuDto, MenuInsertDto.class);
+        menuInsertDto.setParam(menuParameterDtoList);
+        menuInsertDto.setCurrentSort(menuDto.getSort());
+        // 插入新菜单
+        insert(menuInsertDto);
+        return newMenuCode;
+    }
+    private String generateCopySuffix(MenuDto menuDto) {
+        int count = lambdaQuery()
+                .eq(Menu::getAppId, menuDto.getAppId())
+                .like(Menu::getCode, menuDto.getCode() + "-copy%")
+                .count() + 1;
+        return numberToLetter(count);
+    }
+
+    private String numberToLetter(int number) {
+        char[] letters = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+        return "-copy" + letters[number - 1];
+    }
     private List<MenuDto> toTree(List<MenuDto> list, String id) {
         List<MenuDto> result = new ArrayList<>();
         Iterator<MenuDto> item = list.iterator();

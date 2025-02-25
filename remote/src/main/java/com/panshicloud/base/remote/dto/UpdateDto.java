@@ -3,8 +3,7 @@ package com.panshicloud.base.remote.dto;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.util.List;
-import java.util.Map;
+import java.io.Serializable;
 
 /**
  * @author: xingxingfa
@@ -12,7 +11,7 @@ import java.util.Map;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class UpdateDto {
+public class UpdateDto implements Serializable {
     /**
      * 正确信息
      */

@@ -78,4 +78,11 @@ public interface IMenuService {
      */
     MenuDto getByCode(String appId, String code);
 
+    /**
+     * 复制菜单
+     *
+     * @param menuId 菜单id
+     */
+    String copy(String menuId);
+
 }

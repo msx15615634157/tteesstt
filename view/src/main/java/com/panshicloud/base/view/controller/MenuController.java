@@ -9,9 +9,7 @@ import com.panshicloud.base.remote.service.IAppService;
 import com.panshicloud.base.remote.service.IMenuParameterService;
 import com.panshicloud.base.remote.service.IMenuService;
 import com.panshicloud.base.view.vo.request.*;
-import com.panshicloud.base.view.vo.response.MenuEnablePermissionResponseVo;
-import com.panshicloud.base.view.vo.response.MenuParameterResponseVo;
-import com.panshicloud.base.view.vo.response.MenuResponseVo;
+import com.panshicloud.base.view.vo.response.*;
 import com.panshicloud.common.base.request.IdRequestVo;
 import com.panshicloud.common.base.response.GenericResponseVo;
 import com.panshicloud.common.base.response.SuccessResponseVo;
@@ -28,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -52,6 +51,20 @@ public class MenuController {
         return new GenericResponseVo<>(ConvertHelper.tToV(menuService.findByAppId(vo.getAppId()), MenuResponseVo.class));
     }
 
+    @ApiOperation("通过全部应用查询菜单")
+    @PostMapping("/findByAllAppId")
+    public GenericResponseVo<List<MenuAndAppResponseVo>> findByAllAppId() {
+        List<AppDto> appList = appService.findAll();
+        List<MenuAndAppResponseVo> rst = new ArrayList<>();
+        for (AppDto app : appList) {
+            MenuAndAppResponseVo menuAndAppResponseVo = ConvertHelper.tToV(app, MenuAndAppResponseVo.class);
+            List<MenuResponseVo> menuResponseVos = ConvertHelper.tToV(menuService.findByAppId(app.getId()), MenuResponseVo.class);
+            menuAndAppResponseVo.setMenuList(menuResponseVos);
+            rst.add(menuAndAppResponseVo);
+        }
+        return new GenericResponseVo<>(rst);
+    }
+
     @ApiOperation("通过所属应用查询菜单")
     @PostMapping("/findEnablePermissionByAppId")
     public GenericResponseVo<List<MenuEnablePermissionResponseVo>> findEnablePermissionByAppId(@RequestBody @Validated MenuFindRequestVo vo) {
@@ -64,6 +77,13 @@ public class MenuController {
     public SuccessResponseVo insert(@RequestBody @Validated MenuInsetRequestVo vo) {
         menuService.insert(ConvertHelper.tToV(vo, MenuInsertDto.class));
         return ResponseHelper.SUCCESS;
+    }
+
+    @ApiOperation("复制菜单")
+    @PostMapping("/copy")
+    @OperationLog(type = "菜单-复制", operation = "复制菜单", value = "'菜单Id='+#vo.menuId")
+    public GenericResponseVo<String> copy(@RequestBody @Validated MenuCopyRequestVo vo) {
+        return new GenericResponseVo<>(menuService.copy(vo.getMenuId()));
     }
 
     @ApiOperation("修改菜单")
@@ -112,12 +132,12 @@ public class MenuController {
         return new GenericResponseVo<>(ConvertHelper.tToV(menuParameterService.findByMenuId(vo.getId()), MenuParameterResponseVo.class));
     }
 
-//    暂不使用
-//    @ApiOperation("查询菜单参数")
-//    @PostMapping("/findEnablePermissions")
-//    public GenericResponseVo<List<MenuParameterResponseVo>> findEnablePermissions(@RequestBody @Validated IdRequestVo vo) {
-//        return new GenericResponseVo<>(ConvertHelper.tToV(menuParameterService.findEnablePermissions(vo.getId()), MenuParameterResponseVo.class));
-//    }
+    //    暂不使用
+    //    @ApiOperation("查询菜单参数")
+    //    @PostMapping("/findEnablePermissions")
+    //    public GenericResponseVo<List<MenuParameterResponseVo>> findEnablePermissions(@RequestBody @Validated IdRequestVo vo) {
+    //        return new GenericResponseVo<>(ConvertHelper.tToV(menuParameterService.findEnablePermissions(vo.getId()), MenuParameterResponseVo.class));
+    //    }
 
     @ApiOperation("根据菜单编码查询菜单参数")
     @PostMapping("/findParametersByCode")

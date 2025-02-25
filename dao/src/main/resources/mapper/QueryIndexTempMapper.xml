@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.panshicloud.base.dao.mapper.QueryIndexTempMapper">
+
+    <insert id="insert" databaseId="oracle">
+        INSERT INTO PSC_QUERY_INDEX_TEMP (ID, QUERY_ID, MD5, SORT)
+        values (SYS_GUID(), #{queryId}, #{md5}, #{sort})
+    </insert>
+
+    <insert id="insert" databaseId="mysql">
+        INSERT INTO PSC_QUERY_INDEX_TEMP (ID, QUERY_ID, MD5, SORT)
+        values (UUID(), #{queryId}, #{md5}, #{sort})
+    </insert>
+
+    <select id="truncateTmp">
+        truncate table PSC_QUERY_INDEX_TEMP
+    </select>
+
+</mapper>

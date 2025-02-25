@@ -25,11 +25,12 @@
         <module>view</module>
         <module>operationlog</module>
         <module>parameter</module>
+        <module>timed</module>
     </modules>
 
     <properties>
         <!-- revision -->
-        <revision>2.2.6-SNAPSHOT</revision>
+        <revision>3.0.0-SNAPSHOT</revision>
         <!-- Spring Cloud Alibaba -->
         <spring.cloud.alibaba.version>2021.0.1.0</spring.cloud.alibaba.version>
         <!-- Spring Cloud -->
@@ -103,7 +104,7 @@
             <dependency>
                 <groupId>com.panshicloud</groupId>
                 <artifactId>dependencies</artifactId>
-                <version>2.2.6-SNAPSHOT</version>
+                <version>3.0.0-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -153,6 +154,23 @@
                     </execution>
                 </executions>
             </plugin>
+<!--            <plugin>-->
+<!--                <groupId>pl.project13.maven</groupId>-->
+<!--                <artifactId>git-commit-id-plugin</artifactId>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <goals>-->
+<!--                            <goal>revision</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--                <configuration>-->
+<!--                    <verbose>true</verbose>-->
+<!--                    <dateFormat>yyyy-MM-dd HH:mm:ss</dateFormat>-->
+<!--                    <generateGitPropertiesFile>true</generateGitPropertiesFile>-->
+<!--                    <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 

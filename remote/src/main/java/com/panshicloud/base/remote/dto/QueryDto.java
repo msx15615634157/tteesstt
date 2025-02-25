@@ -3,6 +3,7 @@ package com.panshicloud.base.remote.dto;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +13,7 @@ import java.util.Map;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class QueryDto {
+public class QueryDto implements Serializable {
     /**
      * 头部字段名
      */

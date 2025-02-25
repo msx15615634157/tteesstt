@@ -1,5 +1,6 @@
 package com.panshicloud.base.service.provider;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.panshicloud.base.dao.entity.MenuParameter;
@@ -9,10 +10,15 @@ import com.panshicloud.base.remote.dto.MenuDto;
 import com.panshicloud.base.remote.dto.MenuEnablePermissionDto;
 import com.panshicloud.base.remote.dto.MenuParameterDto;
 import com.panshicloud.base.remote.service.IMenuParameterService;
+import com.panshicloud.base.service.constants.RedisKeyCst;
 import com.panshicloud.common.helper.ConvertHelper;
 import com.panshicloud.common.utils.StringUtils;
 import org.apache.dubbo.config.annotation.DubboService;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,12 +33,17 @@ import java.util.stream.Collectors;
 @DubboService
 public class MenuParameterServiceProvider extends ServiceImpl<MenuParameterMapper, MenuParameter> implements IMenuParameterService {
 
+    @Resource
+    private RedisTemplate redisTemplate;
+
     @Override
+    @CacheEvict(value = RedisKeyCst.MENU_PARAMETER, key = "#menuId")
     public void deleteByMenuId(String menuId) {
         lambdaUpdate().eq(MenuParameter::getMenuId, menuId).remove();
     }
 
     @Override
+    @Cacheable(value = RedisKeyCst.MENU_PARAMETER, key = "#menuId")
     public List<MenuParameterDto> findByMenuId(String menuId) {
         List<MenuParameter> find = lambdaQuery().eq(MenuParameter::getMenuId, menuId).list();
         List<MenuParameterDto> rst = new ArrayList<>();
@@ -47,7 +58,7 @@ public class MenuParameterServiceProvider extends ServiceImpl<MenuParameterMappe
         return rst;
     }
 
-    @Override
+/*    @Override
     public List<MenuEnablePermissionDto> findEnablePermissions(List<MenuDto> menus) {
         List<MenuEnablePermissionDto> rst = new ArrayList<>();
         // 获取菜单id集合
@@ -58,7 +69,7 @@ public class MenuParameterServiceProvider extends ServiceImpl<MenuParameterMappe
         Map<String, List<MenuParameter>> groupMenu = allMenuParameter.stream().sorted(Comparator.comparing(MenuParameter::getMenuId)).collect(Collectors.groupingBy(MenuParameter::getMenuId));
         for (String menuId : groupMenu.keySet()) {
             Optional<MenuDto> optional = menus.stream().filter(it -> it.getId().equals(menuId)).findAny();
-            if (!optional.isPresent()){
+            if (!optional.isPresent()) {
                 continue;
             }
             MenuEnablePermissionDto menuEnablePermission = ConvertHelper.tToV(optional.get(), MenuEnablePermissionDto.class);
@@ -72,6 +83,10 @@ public class MenuParameterServiceProvider extends ServiceImpl<MenuParameterMappe
                 parameter.setValue(StringUtils.isBlank(menuParameter.getValue()) ? "" : StringUtils.toObject(menuParameter.getValue()));
                 // 包含按钮权限的
                 if (menuParameter.getIsTab() != null && "true".equalsIgnoreCase(menuParameter.getIsTab())) {
+                    // todo 临时过滤报错，前端传非json字符串问题
+                    if (StringUtils.equals("\"\"", parameter.getValue())) {
+                        parameter.setValue("[]");
+                    }
                     List<BtnParameterDto> btnParameterList = JSONObject.parseArray((String) parameter.getValue(), BtnParameterDto.class);
                     List<BtnParameterDto> btnParameters = btnParameterList.stream().filter(it -> it.getIsPermission() != null && it.getIsPermission()).collect(Collectors.toList());
                     if (btnParameters.size() > 0) {
@@ -86,9 +101,68 @@ public class MenuParameterServiceProvider extends ServiceImpl<MenuParameterMappe
             }
         }
         return rst;
+    }*/
+
+    @Override
+    public List<MenuEnablePermissionDto> findEnablePermissions(List<MenuDto> menus) {
+        List<MenuEnablePermissionDto> rst = new ArrayList<>();
+        // 获取菜单id集合
+        List<String> menuIds = menus.stream().map(MenuDto::getId).collect(Collectors.toList());
+        // 获取全部的菜单参数
+        List<MenuParameter> allMenuParameter = lambdaQuery().in(MenuParameter::getMenuId, menuIds).list();
+        // 按菜单id分组
+        Map<String, List<MenuParameter>> groupMenu = allMenuParameter.stream().sorted(Comparator.comparing(MenuParameter::getMenuId)).collect(Collectors.groupingBy(MenuParameter::getMenuId));
+        for (String menuId : groupMenu.keySet()) {
+            Optional<MenuDto> optional = menus.stream().filter(it -> it.getId().equals(menuId)).findAny();
+            if (!optional.isPresent()) {
+                continue;
+            }
+            MenuEnablePermissionDto menuEnablePermission = ConvertHelper.tToV(optional.get(), MenuEnablePermissionDto.class);
+            List<MenuParameterDto> menuParameterResults = new ArrayList<>();
+            List<MenuParameter> menuParameters = groupMenu.get(menuId);
+            menuParameters = menuParameters.stream().filter(item -> null != item.getValue() && item.getValue().contains("isPermission")).collect(Collectors.toList());
+            for (MenuParameter menuParameter : menuParameters) {
+                List<String> parameterValues = JSON.parseArray(menuParameter.getValue(), String.class);
+                if (parameterValues.size() != 2) {
+                    continue;
+                }
+                String valueJson = parameterValues.get(1);
+                if (StringUtils.isBlank(valueJson)) {
+                    continue;
+                }
+                MenuParameterDto parameter = new MenuParameterDto();
+                parameter.setCode(menuParameter.getCode());
+                // 转换为原来的格式
+                parameter.setValue(StringUtils.isBlank(menuParameter.getValue()) ? "" : StringUtils.toObject(menuParameter.getValue()));
+
+                List<BtnParameterDto> btnParameterList = null;
+                try {
+                    btnParameterList = JSONObject.parseArray((String) parameter.getValue(), BtnParameterDto.class);
+                } catch (Exception e) {
+                    log.error("JSON字符串转集合失败：" + parameter.getValue());
+                    continue;
+                }
+                List<BtnParameterDto> btnParameters = btnParameterList.stream().filter(it -> it.getIsPermission() != null && it.getIsPermission()).collect(Collectors.toList());
+                if (btnParameters.size() > 0) {
+                    parameter.setIsTab("true");
+                    btnParameters = btnParameters.stream().filter(BtnParameterDto::getIsPermission).collect(Collectors.toList());
+                    parameter.setValue(btnParameters);
+                    menuParameterResults.add(parameter);
+                }
+                if (StringUtils.equals("\"\"", parameter.getValue())) {
+                    parameter.setValue("[]");
+                }
+            }
+            if (menuParameterResults.size() != 0) {
+                menuEnablePermission.setMenuParameters(menuParameterResults);
+                rst.add(menuEnablePermission);
+            }
+        }
+        return rst;
     }
 
     @Override
+    @CacheEvict(value = RedisKeyCst.MENU_PARAMETER, key = "#menuId")
     public void update(String menuId, List<MenuParameterDto> parameters) {
         List<MenuParameter> updates = new ArrayList<>();
         for (MenuParameterDto parameter : parameters) {
