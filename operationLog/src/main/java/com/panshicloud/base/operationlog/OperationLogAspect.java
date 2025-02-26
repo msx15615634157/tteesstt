@@ -1,7 +1,7 @@
 package com.panshicloud.base.operationlog;
 
 import com.panshicloud.base.remote.dto.OperationLogDto;
-import com.panshicloud.base.remote.service.IOperationLogDataService;
+import com.panshicloud.base.remote.service.IOperationLogService;
 import com.panshicloud.common.utils.StringUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -39,7 +39,7 @@ import java.lang.reflect.Method;
 public class OperationLogAspect {
 
     @DubboReference
-    private IOperationLogDataService operationLogService;
+    private IOperationLogService operationLogService;
 
     @Autowired(required = false)
     private HttpServletRequest request;
@@ -116,7 +116,8 @@ public class OperationLogAspect {
             entity.setLogInfo(info);
             entity.setInterfaceName(clazz.getName());
             entity.setServerIp(this.request.getLocalAddr());
-            entity.setClientIp(StringUtils.split(this.request.getHeader("X-Forwarded-For"))[0]);
+            String xForwardedFor = this.request.getHeader("X-Forwarded-For");
+            entity.setClientIp(StringUtils.isBlank(xForwardedFor) ? xForwardedFor : StringUtils.split(this.request.getHeader("X-Forwarded-For"))[0]);
             entity.setClientCode(this.request.getHeader("User-Agent"));
             entity.setUri(this.request.getRequestURI());
             entity.setUrl(this.request.getRequestURL().toString());

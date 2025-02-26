@@ -26,12 +26,17 @@ public class ConvertUtils {
     }
 
     public static OperationLogDto getOperation(Class<?> clazz, String type, String operation, String info) {
+        HttpServletRequest request = null;
         // 获取request
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        try {
+            request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        } catch (Exception ignored) {
+
+        }
         return getOperation(request, clazz, type, operation, info);
     }
 
-    public static OperationLogDto getOperation(HttpServletRequest request, Class<?> clazz, String type, String operation, String info) {
+    private static OperationLogDto getOperation(HttpServletRequest request, Class<?> clazz, String type, String operation, String info) {
         // 保存日志
         OperationLogDto entity = new OperationLogDto();
         entity.setType(type);
@@ -46,7 +51,8 @@ public class ConvertUtils {
 
     private static void setRequest(OperationLogDto entity, HttpServletRequest request) {
         entity.setServerIp(request.getLocalAddr());
-        entity.setClientIp(StringUtils.split(request.getHeader("X-Forwarded-For"))[0]);
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        entity.setClientIp(StringUtils.isBlank(xForwardedFor) ? xForwardedFor : StringUtils.split(request.getHeader("X-Forwarded-For"))[0]);
         entity.setClientCode(request.getHeader("User-Agent"));
         entity.setUri(request.getRequestURI());
         entity.setUrl(request.getRequestURL().toString());
