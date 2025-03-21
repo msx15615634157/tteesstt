@@ -189,7 +189,7 @@
     </select>
 
     <select id="findAllTable" resultType="java.util.Map" databaseId="mysql">
-        SELECT table_name, comments
+        SELECT table_name, table_comment COMMENTS
         from information_schema.TABLES
         WHERE table_schema = '${tableSpace}'
     </select>

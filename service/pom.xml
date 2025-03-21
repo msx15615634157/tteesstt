@@ -35,9 +35,8 @@
             <artifactId>web-tools</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.ke-xue-guai</groupId>
+            <groupId>com.export</groupId>
             <artifactId>excel</artifactId>
-            <version>1.0.3</version>
         </dependency>
         <dependency>
             <groupId>com.panshicloud.base</groupId>

@@ -25,4 +25,9 @@ public class DirUpdateDto {
      */
     private Integer type;
 
+    /**
+     * 排序
+     */
+    private Integer sort;
+
 }

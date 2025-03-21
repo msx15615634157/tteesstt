@@ -6,15 +6,13 @@ package com.panshicloud.base.service.constants;
  * @Description CommonCst.java
  * @Version 1.0
  */
-public class CommonCst {
-
-    public static final String SYSTEM_CONFIG_DEFAULT_GROUP = "default";
+public class CommonCst extends com.panshicloud.base.remote.constants.CommonCst {
 
     public static final String MENU_PARAMETER_BTN = "Btns";
 
     public static final String LEFT_BRACKET = "[";
 
-    public static final String RIGHT_BRACKET =  "]";
+    public static final String RIGHT_BRACKET = "]";
 
 
 }

@@ -11,6 +11,7 @@ import com.panshicloud.base.remote.dto.*;
 import com.panshicloud.base.remote.service.ISystemConfigService;
 import com.panshicloud.base.service.constants.CommonCst;
 import com.panshicloud.base.service.constants.ErrorCodeCst;
+import com.panshicloud.base.service.constants.RedisKeyCst;
 import com.panshicloud.base.service.parameter.DefaultParameter;
 import com.panshicloud.base.service.provider.remote.SystemConfigRemote;
 import com.panshicloud.common.constants.JpErrorCodeCst;
@@ -22,10 +23,13 @@ import org.apache.dubbo.config.annotation.DubboService;
 import org.apache.dubbo.rpc.service.GenericService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.core.BoundValueOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author xingxingfa
@@ -34,6 +38,9 @@ import java.util.Optional;
 @DubboService
 @Slf4j
 public class SystemConfigServiceProvider extends ServiceImpl<SystemConfigMapper, SystemConfig> implements ISystemConfigService {
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Autowired
     private SystemConfigMapper systemConfigMapper;
@@ -53,8 +60,27 @@ public class SystemConfigServiceProvider extends ServiceImpl<SystemConfigMapper,
         if (StringUtils.isBlank(groupCode)) {
             groupCode = CommonCst.SYSTEM_CONFIG_DEFAULT_GROUP;
         }
+        // 加rides缓存
+        BoundValueOperations operations = redisTemplate.boundValueOps(RedisKeyCst.SYSTEM_CONFIG_PARAMETER + groupCode);
+        // 判断缓存是不是空
+        if (operations.get() != null) {
+            return (List<SystemConfigDto>) operations.get();
+        }
         AbstractGroup abstractGroup = getGroup(groupCode);
-        return findByGroupCode(abstractGroup);
+        List<SystemConfigDto> rst = findByGroupCode(abstractGroup);
+        // 往redis塞缓存数据
+        operations.set(rst);
+        return rst;
+    }
+
+    @Override
+    public void deleteRedisCache(List<String> groupCodes) {
+        redisTemplate.delete(
+                groupCodes
+                        .stream()
+                        .map(it -> RedisKeyCst.SYSTEM_CONFIG_PARAMETER + it)
+                        .collect(Collectors.toList())
+        );
     }
 
     /**

@@ -66,24 +66,6 @@ public class MenuServiceProvider extends ServiceImpl<MenuMapper, Menu> implement
             insert.setParentId(rootParentId);
         }
         Menu menu = ConvertHelper.tToV(insert, Menu.class);
-        if (insert.getCurrentSort() != null) {
-            // 当前排序加1
-            menu.setSort(insert.getCurrentSort() + 1);
-            // 比当前排序大的都加1
-            lambdaUpdate()
-                    .eq(Menu::getAppId, insert.getAppId())
-                    .eq(Menu::getParentId, insert.getParentId())
-                    .gt(Menu::getSort, insert.getCurrentSort())
-                    .setSql("sort = sort + 1")
-                    .update();
-        } else {
-            // 查询节点个数，并将新增节点的sort设置为该数
-            Integer count = lambdaQuery()
-                    .eq(Menu::getAppId, menu.getAppId())
-                    .eq(Menu::getParentId, menu.getParentId())
-                    .count();
-            menu.setSort(count);
-        }
         save(menu);
         // 保存菜单参数
         menuParameterService.update(menu.getId(), insert.getParam());

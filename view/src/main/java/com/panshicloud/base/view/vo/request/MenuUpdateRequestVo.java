@@ -61,4 +61,8 @@ public class MenuUpdateRequestVo {
     @ApiModelProperty(value = "菜单参数", required = true)
     private List<MenuParameterDto> param;
 
+    @ApiModelProperty(value = "权重值", required = true)
+    @NotNull(message = "权重值不能为空")
+    private Integer sort;
+
 }

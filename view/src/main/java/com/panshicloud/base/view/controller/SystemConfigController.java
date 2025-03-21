@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -83,6 +84,7 @@ public class SystemConfigController {
             systemConfigUpdates.add(systemConfigUpdate);
         }
         systemConfigService.update(systemConfigUpdates);
+        systemConfigService.deleteRedisCache(Collections.singletonList(vo.getGroupCode()));
         return ResponseHelper.SUCCESS;
     }
 

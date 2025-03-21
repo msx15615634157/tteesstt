@@ -31,4 +31,9 @@ public class RedisKeyCst {
      */
     public static final String DIR_TREE = "base:dir:tree:";
 
+    /**
+     * 系统参数
+     */
+    public static final String SYSTEM_CONFIG_PARAMETER = "system-config-parameter:";
+
 }

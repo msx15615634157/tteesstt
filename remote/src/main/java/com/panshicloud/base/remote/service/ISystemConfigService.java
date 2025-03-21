@@ -19,6 +19,13 @@ public interface ISystemConfigService {
     List<SystemConfigDto> findByGroupCode(String groupCode);
 
     /**
+     * 批量删除分组参数缓存
+     *
+     * @param groupCodes 分组编码
+     */
+    void deleteRedisCache(List<String> groupCodes);
+
+    /**
      * 按分组编码跟参数编码获取
      *
      * @param groupCode 分组编码

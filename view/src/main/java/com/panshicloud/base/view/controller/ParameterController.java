@@ -1,5 +1,6 @@
 package com.panshicloud.base.view.controller;
 
+import com.panshicloud.base.remote.constants.CommonCst;
 import com.panshicloud.base.remote.dto.GroupDto;
 import com.panshicloud.base.remote.dto.GroupParameterDto;
 import com.panshicloud.base.remote.service.ISystemConfigService;
@@ -8,7 +9,9 @@ import com.panshicloud.base.view.vo.response.GroupDefineResponseVo;
 import com.panshicloud.base.view.vo.response.GroupParameterResponseVo;
 import com.panshicloud.base.view.vo.response.SystemConfigResponseVo;
 import com.panshicloud.common.base.response.GenericResponseVo;
+import com.panshicloud.common.base.response.SuccessResponseVo;
 import com.panshicloud.common.helper.ConvertHelper;
+import com.panshicloud.common.helper.ResponseHelper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -54,6 +58,18 @@ public class ParameterController {
     @PostMapping("/find")
     public GenericResponseVo<List<SystemConfigResponseVo>> find(@RequestBody @Validated GroupCodeRequestVo vo) {
         return new GenericResponseVo<>(ConvertHelper.tToV(systemConfigService.findByGroupCode(vo.getCode()), SystemConfigResponseVo.class));
+    }
+
+    @ApiOperation("清除系统参数缓存")
+    @PostMapping("/deleteCache")
+    public SuccessResponseVo deleteCache() {
+        List<GroupDto> groupDefine = systemConfigService.findGroupDefine();
+        List<String> groupCodes = groupDefine.stream()
+                .map(GroupDto::getCode)
+                .collect(Collectors.toList());
+        groupCodes.add(CommonCst.SYSTEM_CONFIG_DEFAULT_GROUP);
+        systemConfigService.deleteRedisCache(groupCodes);
+        return ResponseHelper.SUCCESS;
     }
 
 }

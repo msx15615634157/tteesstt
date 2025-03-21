@@ -29,4 +29,8 @@ public class DirUpdateRequestVo {
     @NotNull(message = "类型不能为空")
     private Integer type;
 
+    @ApiModelProperty(value = "排序字段", required = true)
+    @NotNull(message = "排序字段不能为空")
+    private Integer sort;
+
 }

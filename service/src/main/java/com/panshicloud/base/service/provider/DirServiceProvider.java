@@ -42,15 +42,6 @@ public class DirServiceProvider extends ServiceImpl<DirMapper, Dir> implements I
                 .count() > 0) {
             throw ExceptionHelper.newException(ErrorCodeCst.DIR_IS_EXIST, "目录编码已存在，新增失败");
         }
-        LambdaQueryChainWrapper<Dir> queryChainWrapper = lambdaQuery()
-                .eq(Dir::getType, dir.getType());
-        if (StringUtils.isBlank(dir.getParentCode())) {
-            queryChainWrapper.isNull(Dir::getParentCode);
-        } else {
-            queryChainWrapper.eq(Dir::getParentCode, dir.getParentCode());
-        }
-        Integer count = queryChainWrapper.count();
-        dir.setSort(count);
         save(ConvertHelper.tToV(dir, Dir.class));
         this.deleteRedisCache(dir.getType());
     }
@@ -68,6 +59,7 @@ public class DirServiceProvider extends ServiceImpl<DirMapper, Dir> implements I
                     .eq(Dir::getType, dir.getType())
                     .eq(Dir::getCode, dir.getCode())
                     .set(Dir::getName, dir.getName())
+                    .set(Dir::getSort, dir.getSort())
                     .update();
         }
         this.deleteRedisCache(dir.getType());

@@ -33,4 +33,8 @@ public class DirInsertRequestVo {
     @ApiModelProperty(value = "父级编码", required = true)
     private String parentCode;
 
+    @ApiModelProperty(value = "排序字段", required = true)
+    @NotNull(message = "排序字段不能为空")
+    private Integer sort;
+
 }

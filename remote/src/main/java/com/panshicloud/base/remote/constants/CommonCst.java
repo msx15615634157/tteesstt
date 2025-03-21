@@ -25,4 +25,6 @@ public class CommonCst {
     public static final String TABLE_FIELD_DATE = "DATE";
     public static final String TABLE_FIELD_CLOB = "CLOB";
 
+    public static final String SYSTEM_CONFIG_DEFAULT_GROUP = "default";
+
 }
